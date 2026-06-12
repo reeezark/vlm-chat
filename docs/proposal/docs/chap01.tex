@@ -1,0 +1,90 @@
+% !TeX root = ../main.tex
+
+\chapter{任务定义与应用背景}
+\label{cha:introduction}
+
+\section{任务定义}
+\label{sec:task_definition}
+
+本项目旨在构建一个\textbf{基于视觉语言模型的智能图文问答助手}，核心任务是实现用户上传图片后进行中文多轮问答交互。
+
+\subsection{问题形式化}
+
+给定一张图片$I$和用户问题$q$，系统需要生成回答$a$。若存在历史对话$H = \{(q_1, a_1), (q_2, a_2), ..., (q_{n-1}, a_{n-1})\}$，则需结合上下文生成连贯回答：
+\begin{equation}
+  a = f(I, q, H)
+\end{equation}
+其中$f$为视觉语言模型的多模态理解函数。
+
+\subsection{核心任务}
+
+\begin{enumerate}
+  \item \textbf{图片理解}：识别图片中的物体、文字、场景等元素；
+  \item \textbf{中文问答}：针对图片内容生成准确的中文回答；
+  \item \textbf{多轮对话}：支持上下文追问，如"这个商品是什么？"→"它的价格是多少？"；
+  \item \textbf{文档OCR}：识别并理解文档截图中的文字内容。
+\end{enumerate}
+
+\section{应用背景}
+\label{sec:background}
+
+\subsection{多模态交互需求}
+
+在实际应用中，用户往往需要同时处理图像和文本信息。例如：
+\begin{itemize}
+  \item 消费者看到商品图片，想了解详细信息；
+  \item 学生遇到讲义截图，需要理解公式含义；
+  \item 办公人员需要从文档图片中提取关键信息。
+\end{itemize}
+
+传统搜索引擎仅支持文本输入，无法满足"看图提问"的需求。视觉语言模型的出现为这类场景提供了技术解决方案。
+
+\subsection{技术发展驱动}
+
+2023年以来，视觉语言模型快速发展：
+\begin{itemize}
+  \item GPT-4V展示了强大的多模态理解能力；
+  \item Qwen-VL系列专为中文优化，OCR能力强；
+  \item API服务普及，降低了部署门槛。
+\end{itemize}
+
+\section{应用场景}
+\label{sec:applications}
+
+\begin{table}[htbp]
+  \centering
+  \caption{主要应用场景}
+  \label{tab:applications}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{场景} & \textbf{用户行为} & \textbf{系统功能} \\
+    \hline
+    电商购物 & 上传商品图片 & 识别品牌、价格、规格 \\
+    \hline
+    在线教育 & 上传讲义截图 & 公式解释、概念讲解 \\
+    \hline
+    智能办公 & 上传文档图片 & OCR识别、信息提取 \\
+    \hline
+    生活助手 & 上传场景照片 & 物体识别、场景描述 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\section{本项目特色与创新点}
+\label{sec:innovation}
+
+本项目具有以下特色和创新点：
+
+\begin{enumerate}
+  \item \textbf{中文优化的多模态体验}：选用Qwen-VL-Plus模型，专为中文场景优化，在中文OCR和文档理解方面具有领先优势，相比英文主导的模型更适合国内用户使用。
+
+  \item \textbf{无需GPU的轻量化部署}：采用云端API调用方案，用户无需配置GPU环境，普通PC即可运行，大幅降低了多模态AI技术的使用门槛。
+
+  \item \textbf{多轮对话的上下文记忆}：系统支持多轮追问功能，能够理解代词指代和上下文语义（如"它的价格是多少"中的"它"指代前文商品），提供连贯的对话体验。
+
+  \item \textbf{面向实际场景的评测设计}：构建覆盖自然场景和文档图像的双模态评测数据集（80条），使用真实图片进行评测，设计识别、属性提取、推理、OCR、文档摘要五类问题，采用基于jieba中文分词的语义匹配算法进行自动评测，整体准确率达到81.2\%。
+
+  \item \textbf{ChatGPT风格的交互界面}：采用Gradio 6.x框架实现暗色主题的双栏布局——左侧会话管理列表、右侧聊天区域，支持图片与文字的混合输入（MultimodalTextbox），提供类ChatGPT的现代化交互体验。
+
+  \item \textbf{规范的软件工程实践}：项目采用类型注解、统一日志系统、自动化测试（61个测试用例）等工程实践，确保代码的可维护性和可靠性。
+\end{enumerate}

@@ -1,0 +1,140 @@
+% !TeX root = ../main.tex
+
+\chapter{相关工作调研}
+\label{cha:related_work}
+
+本章调研5篇代表性论文/项目，分析视觉语言模型的发展脉络和技术特点。
+
+\section{代表性论文调研}
+\label{sec:papers}
+
+\subsection{论文1：VQA任务开创 (Antol et al., 2015)}
+
+\textbf{论文}：Visual Question Answering\cite{antol2015vqa}
+
+\textbf{贡献}：首次提出视觉问答（VQA）任务，定义了"给定图片和自然语言问题，生成准确回答"的问题形式。建立了VQA数据集，包含超过200,000张图片和600,000个问题。
+
+\textbf{技术要点}：
+\begin{itemize}
+  \item LSTM编码问题文本，CNN提取图片特征；
+  \item 多模态融合生成答案；
+  \item 评估指标：准确率（与人工标注答案的一致性）。
+\end{itemize}
+
+\textbf{对本项目的启示}：明确了多模态问答的任务定义和评估方法。
+
+\subsection{论文2：对比学习预训练 (Radford et al., 2021)}
+
+\textbf{论文}：Learning Transferable Visual Models from Natural Language Supervision\cite{radford2021clip}
+
+\textbf{贡献}：提出CLIP模型，通过大规模图文对比学习实现零样本跨模态理解。无需微调即可完成图像分类、检索等任务。
+
+\textbf{技术要点}：
+\begin{itemize}
+  \item 4亿规模的图文对预训练；
+  \item 对称的图像编码器和文本编码器；
+  \item 零样本迁移能力强。
+\end{itemize}
+
+\textbf{对本项目的启示}：证明了大规模预训练对跨模态理解的有效性。
+
+\subsection{论文3：视觉指令微调 (Liu et al., 2023)}
+
+\textbf{论文}：Visual Instruction Tuning\cite{liu2023llava}
+
+\textbf{贡献}：提出LLaVA模型，通过视觉指令微调将大型语言模型扩展为多模态模型。开创了"指令微调+投影层"的技术路线。
+
+\textbf{技术要点}：
+\begin{itemize}
+  \item CLIP视觉编码器 + Vicuna语言模型；
+  \item 简单线性投影层连接视觉和语言特征；
+  \item 自构造的多模态指令数据集。
+\end{itemize}
+
+\textbf{对本项目的启示}：证明了指令微调对多模态对话能力的提升效果。
+
+\subsection{论文4：中文VLM优化 (Bai et al., 2023)}
+
+\textbf{论文}：Qwen-VL: A Frontier Large Vision-Language Model\cite{bai2023qwen}
+
+\textbf{贡献}：提出Qwen-VL系列模型，专为中文多模态场景优化。在中文OCR、文档理解方面表现领先。
+
+\textbf{技术要点}：
+\begin{itemize}
+  \item 多语言预训练数据，中文占比高；
+  \item 支持任意分辨率图片输入；
+  \item 精细的OCR和文档理解能力。
+\end{itemize}
+
+\textbf{对本项目的启示}：为中文图文问答提供了最优模型选择。
+
+\subsection{论文5：图文预训练统一 (Li et al., 2022)}
+
+\textbf{论文}：BLIP: Bootstrapping Language-Image Pre-training\cite{li2022blip}
+
+\textbf{贡献}：提出BLIP模型，统一了图文理解与生成任务。通过自举方法提升预训练数据质量。
+
+\textbf{技术要点}：
+\begin{itemize}
+  \item 编码器-解码器架构统一理解与生成；
+  \item CapFilt方法过滤低质量图文对；
+  \item 在图像描述、VQA等任务表现优异。
+\end{itemize}
+
+\textbf{对本项目的启示}：展示了多任务统一训练的有效性。
+
+\section{代表性项目调研}
+\label{sec:projects}
+
+\subsection{项目1：Gradio框架}
+
+\textbf{项目}：Gradio - Build and Share Machine Learning Web Apps\cite{gradio2023}
+
+\textbf{特点}：快速搭建AI推理服务界面，原生支持多模态组件。
+
+\textbf{关键功能}：
+\begin{itemize}
+  \item 图片上传组件（gr.Image）；
+  \item 聊天展示组件（gr.Chatbot）；
+  \item 多模态输入组件（gr.MultimodalTextbox），支持文字与图片混合输入；
+  \item 自动生成API接口。
+\end{itemize}
+
+\textbf{对本项目的启示}：选择Gradio 6.x作为前端框架，利用MultimodalTextbox和自定义CSS实现ChatGPT风格的暗色主题界面。
+
+\subsection{项目2：DashScope API}
+
+\textbf{项目}：阿里云DashScope模型服务平台\cite{dashscope2023}
+
+\textbf{特点}：提供Qwen-VL等模型的API调用服务，支持OpenAI兼容接口。
+
+\textbf{关键功能}：
+\begin{itemize}
+  \item Qwen-VL-Plus模型；
+  \item OpenAI兼容接口，调用简单；
+  \item 无需本地GPU，降低硬件门槛。
+\end{itemize}
+
+\textbf{对本项目的启示}：选择DashScope作为模型服务，降低部署复杂度。
+
+\section{技术路线对比}
+\label{sec:comparison}
+
+\begin{table}[htbp]
+  \centering
+  \caption{不同技术方案对比}
+  \label{tab:comparison}
+  \begin{tabularx}{\textwidth}{|l|X|X|l|}
+    \hline
+    \textbf{方案} & \textbf{优点} & \textbf{缺点} & \textbf{适用场景} \\
+    \hline
+    本地部署LLaVA & 免费、可控 & 需GPU、部署复杂 & 有GPU资源的学术研究 \\
+    \hline
+    ChatGPT Plus & 功能强大 & 需付费、英文为主 & 个人日常使用 \\
+    \hline
+    DashScope API & 中文优化、API便捷 & 按量计费 & 中文应用开发 \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+综合对比，本项目选择DashScope API（Qwen-VL-Plus）+ Gradio 6.x的技术路线，兼顾中文优化、部署便捷和开发效率。Gradio 6.x提供了MultimodalTextbox等新组件，支持更灵活的多模态输入交互。

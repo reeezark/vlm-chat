@@ -1,0 +1,255 @@
+% !TeX root = ../main.tex
+
+\chapter{初步数据集与实验设想}
+\label{cha:dataset_experiment}
+
+\section{数据集设计}
+\label{sec:dataset}
+
+\subsection{数据规模}
+
+构建中等规模评测数据集，共80条问答数据：
+
+\begin{table}[htbp]
+  \centering
+  \caption{数据集规模设计}
+  \label{tab:dataset_scale}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{类别} & \textbf{图片数量} & \textbf{问题数量} \\
+    \hline
+    自然场景 & 20张 & 40条 \\
+    \hline
+    文档截图 & 20张 & 40条 \\
+    \hline
+    合计 & 40张 & 80条 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{数据来源}
+
+\begin{itemize}
+  \item \textbf{自然场景图片}：通过picsum.photos和Pixabay等免费图库下载的真实风景、动物、花卉、城市等场景图片，共20张；
+  \item \textbf{文档截图}：使用PIL/Pillow程序化生成的逼真文档图片，包含中文文字、表格、段落排版等元素，共20张；
+  \item \textbf{问题设计}：识别类、属性提取类、推理类、OCR类、文档摘要类五类问题。
+\end{itemize}
+
+\subsection{问题类型分布}
+
+评测数据集已构建完成，存储于\texttt{data/evaluation\_dataset.json}，共80条数据。每条数据包含6个字段：\texttt{id}（编号）、\texttt{image}（图片文件名）、\texttt{question}（问题）、\texttt{answer}（标准答案）、\texttt{category}（类别）、\texttt{sub\_category}（子类别）。
+
+问题按子类别分布如下：
+
+\begin{table}[htbp]
+  \centering
+  \caption{问题类型分布}
+  \label{tab:question_type}
+  \begin{tabular}{|l|l|l|l|}
+    \hline
+    \textbf{类别} & \textbf{子类别} & \textbf{数量} & \textbf{示例} \\
+    \hline
+    \multirow{3}{*}{自然场景} & 识别类（recognition） & 26 & "请描述这张图片中的主要内容" \\
+    \cline{2-4}
+     & 属性提取（attribute） & 8 & "图片中的天空是什么样的？" \\
+    \cline{2-4}
+     & 推理类（reasoning） & 6 & "这个场景可能发生在哪里？" \\
+    \hline
+    \multirow{2}{*}{文档图像} & OCR识别（ocr） & 27 & "文档的标题是什么？" \\
+    \cline{2-4}
+     & 文档摘要（summary） & 13 & "文档的主要内容是什么？" \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\section{算力预算}
+\label{sec:compute}
+
+\subsection{硬件需求}
+
+本项目采用云端API调用，\textbf{无需本地GPU}，硬件需求极低：
+
+\begin{table}[htbp]
+  \centering
+  \caption{硬件需求}
+  \label{tab:hardware}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{资源} & \textbf{需求} & \textbf{说明} \\
+    \hline
+    CPU & 普通PC即可 & 后端逻辑处理 \\
+    \hline
+    内存 & $\geq$4GB & 图片编码缓存 \\
+    \hline
+    GPU & 无需 & 使用云端API \\
+    \hline
+    存储 & $\geq$500MB & 图片和数据存储 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{API成本估算}
+
+DashScope API按token计费，预估成本：
+
+\begin{table}[htbp]
+  \centering
+  \caption{API成本估算}
+  \label{tab:api_cost}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{用途} & \textbf{预估调用次数} & \textbf{预估费用} \\
+    \hline
+    开发测试 & 200次 & 约10元 \\
+    \hline
+    评测实验 & 80次 & 约4元 \\
+    \hline
+    演示展示 & 50次 & 约2元 \\
+    \hline
+    合计 & 330次 & 约16元 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+注：Qwen-VL-Plus按token计费，具体价格参考DashScope官方定价。
+
+\subsection{成本控制策略}
+
+\begin{itemize}
+  \item 使用阿里云免费额度（新用户有免费试用）；
+  \item 优化prompt，减少无效token消耗；
+  \item 缓存常见问题的回答，避免重复调用。
+\end{itemize}
+
+\section{时间计划}
+\label{sec:timeline}
+
+\subsection{总体时间安排}
+
+项目计划在\textbf{两周（10个工作日）}内完成。
+
+\begin{table}[htbp]
+  \centering
+  \caption{时间计划表}
+  \label{tab:timeline}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{阶段} & \textbf{时间} & \textbf{主要任务} \\
+    \hline
+    基础搭建 & 第1-2天 & API配置、基础调用测试 \\
+    \hline
+    界面开发 & 第3-4天 & Gradio界面、核心功能 \\
+    \hline
+    功能完善 & 第5-6天 & 多轮对话、错误处理 \\
+    \hline
+    评测实验 & 第7-8天 & 数据集构建、性能测试 \\
+    \hline
+    总结交付 & 第9-10天 & 文档编写、演示准备 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{里程碑节点}
+
+\begin{enumerate}
+  \item \textbf{第2天}：API调用成功，返回问答结果；
+  \item \textbf{第4天}：Web UI运行，支持图片问答；
+  \item \textbf{第6天}：多轮对话流畅，交互完善；
+  \item \textbf{第8天}：评测完成，生成报告；
+  \item \textbf{第10天}：项目交付，可演示运行。
+\end{enumerate}
+
+\section{评测实验结果}
+\label{sec:results}
+
+\subsection{总体结果}
+
+基于80条评测数据的自动评测结果如下：
+
+\begin{table}[htbp]
+  \centering
+  \caption{评测总体结果}
+  \label{tab:eval_results}
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{指标} & \textbf{值} \\
+    \hline
+    总数据量 & 80 \\
+    \hline
+    匹配数 & 65 \\
+    \hline
+    \textbf{整体准确率} & \textbf{81.2\%} \\
+    \hline
+    平均响应时间 & 3.59秒 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{分类结果}
+
+\begin{table}[htbp]
+  \centering
+  \caption{按类别统计}
+  \label{tab:eval_category}
+  \begin{tabular}{|l|l|l|l|}
+    \hline
+    \textbf{类别} & \textbf{数据量} & \textbf{准确率} & \textbf{平均响应时间} \\
+    \hline
+    自然场景 & 40 & 92.5\% & 3.74秒 \\
+    \hline
+    文档图像 & 40 & 70.0\% & 3.43秒 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{按子类别统计}
+  \label{tab:eval_subcategory}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{子类别} & \textbf{数据量} & \textbf{准确率} \\
+    \hline
+    recognition（识别） & 26 & 96.2\% \\
+    \hline
+    attribute（属性） & 8 & 87.5\% \\
+    \hline
+    reasoning（推理） & 10 & 90.0\% \\
+    \hline
+    ocr（文字识别） & 27 & 66.7\% \\
+    \hline
+    summary（摘要） & 9 & 66.7\% \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{结果分析}
+
+评测结果表明：
+\begin{itemize}
+  \item 自然场景识别能力突出（92.5\%），尤其在物体识别（96.2\%）和推理（90.0\%）方面表现优秀；
+  \item 文档图像理解能力有待提升（70.0\%），OCR和摘要子类别均为66.7\%，主要挑战在于文档图片为程序化生成，文字排版与真实文档存在差异；
+  \item 平均响应时间3.59秒，满足$\leq$5秒的性能目标。
+\end{itemize}
+
+\section{风险与应对}
+\label{sec:risk}
+
+\begin{table}[htbp]
+  \centering
+  \caption{风险分析表}
+  \label{tab:risk}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{风险} & \textbf{影响} & \textbf{应对措施} \\
+    \hline
+    API调用失败 & 功能中断 & 重试机制、备用API \\
+    \hline
+    图片处理错误 & 用户体验差 & 格式验证、大小限制 \\
+    \hline
+    响应延迟 & 用户等待久 & 超时设置、进度提示 \\
+    \hline
+    数据集不足 & 评测不全面 & 补充数据、简化评测 \\
+    \hline
+  \end{tabular}
+\end{table}

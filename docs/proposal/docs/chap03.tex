@@ -1,0 +1,182 @@
+% !TeX root = ../main.tex
+
+\chapter{系统方案设计}
+\label{cha:system_design}
+
+\section{系统架构}
+\label{sec:architecture}
+
+本系统采用三层架构设计，如图\ref{fig:architecture}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.85\textwidth}{
+    \centering
+    \vspace{5pt}
+    \textbf{用户交互层}\\[3pt]
+    Gradio Web UI\\
+    图片上传 $\rightarrow$ 文本输入 $\rightarrow$ 聊天展示\\[8pt]
+    $\downarrow$ HTTP请求\\[8pt]
+    \textbf{应用逻辑层}\\[3pt]
+    Python Backend\\
+    会话管理 $\rightarrow$ 图片处理 $\rightarrow$ API封装\\[8pt]
+    $\downarrow$ API调用\\[8pt]
+    \textbf{模型服务层}\\[3pt]
+    阿里云DashScope\\
+    Qwen-VL-Plus\\
+    \vspace{5pt}
+  }}
+  \caption{系统三层架构图}
+  \label{fig:architecture}
+\end{figure}
+
+\subsection{各层职责}
+
+\begin{itemize}
+  \item \textbf{用户交互层}：Gradio 6.x框架实现ChatGPT风格的暗色主题Web界面，采用双栏布局——左侧会话管理列表、右侧聊天区域，支持MultimodalTextbox混合输入图片与文字；
+  \item \textbf{应用逻辑层}：Python后端处理会话管理、图片预处理、API调用封装；
+  \item \textbf{模型服务层}：DashScope API提供Qwen-VL-Plus模型的多模态理解能力。
+\end{itemize}
+
+\section{模型选择}
+\label{sec:model_selection}
+
+\subsection{核心模型：Qwen-VL-Plus}
+
+选择理由如表\ref{tab:model_reasons}所示：
+
+\begin{table}[htbp]
+  \centering
+  \caption{模型选择理由}
+  \label{tab:model_reasons}
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{特点} & \textbf{说明} \\
+    \hline
+    中文优化 & 专为中文场景设计，OCR能力强 \\
+    \hline
+    文档理解 & 支持文档截图、图表分析 \\
+    \hline
+    API便捷 & OpenAI兼容接口，调用简单 \\
+    \hline
+    无需GPU & 云端API调用，降低硬件门槛 \\
+    \hline
+    高性价比 & 相比Qwen2.5-VL-7B-Instruct，推理速度更快、效果更优 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{模型配置}
+
+\begin{itemize}
+  \item \textbf{模型名称}：qwen-vl-plus（DashScope平台）
+  \item \textbf{调用方式}：OpenAI兼容接口（\url{https://dashscope.aliyuncs.com/compatible-mode/v1}）
+  \item \textbf{参数设置}：temperature=0.7（平衡创造性与准确性）
+  \item \textbf{最大token}：512（控制响应长度和成本）
+  \item \textbf{Top-p}：0.9
+\end{itemize}
+
+\section{评测指标}
+\label{sec:metrics}
+
+\subsection{功能性指标}
+
+\begin{table}[htbp]
+  \centering
+  \caption{功能性评测指标}
+  \label{tab:func_metrics}
+  \begin{tabular}{|l|l|l|l|}
+    \hline
+    \textbf{指标} & \textbf{定义} & \textbf{目标值} & \textbf{实际值} \\
+    \hline
+    整体问答准确率 & 回答与标准答案语义匹配度 & $\geq$80\% & 81.2\% \\
+    \hline
+    自然场景准确率 & 自然场景图片问答准确率 & $\geq$80\% & 92.5\% \\
+    \hline
+    文档图像准确率 & 文档OCR与理解准确率 & $\geq$70\% & 70.0\% \\
+    \hline
+    功能完整性 & 核心功能实现比例 & 100\% & 100\% \\
+    \hline
+  \end{tabular}
+\end{table}
+
+评测采用基于jieba中文分词的语义匹配算法，通过提取期望答案的内容词并与模型回答进行包含匹配，支持短答案（$\leq$3个词，至少匹配1个词）和长答案（匹配率$\geq$40\%）两种判定策略。
+
+\subsection{性能指标}
+
+\begin{table}[htbp]
+  \centering
+  \caption{性能评测指标}
+  \label{tab:perf_metrics}
+  \begin{tabular}{|l|l|l|l|}
+    \hline
+    \textbf{指标} & \textbf{定义} & \textbf{目标值} & \textbf{实际值} \\
+    \hline
+    平均响应时间 & 从提问到返回回答的时间 & $\leq$5秒 & 3.59秒 \\
+    \hline
+    图片处理时间 & 图片上传到编码完成的时间 & $\leq$1秒 & $<$1秒 \\
+    \hline
+    并发能力 & 同时支持的会话数 & $\geq$10 & $\geq$10 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{评测方法}
+
+\begin{enumerate}
+  \item \textbf{自动评测}：基于jieba中文分词的语义匹配算法，提取期望答案内容词并与模型回答进行包含匹配，支持短答案和长答案两种判定策略；
+  \item \textbf{人工抽检}：对自动评测中标记为匹配/不匹配的样例进行人工复核，验证评测算法的准确性；
+  \item \textbf{分类统计}：按自然场景、文档图像两大类别以及识别、属性、推理、OCR、摘要五个子类别分别统计准确率。
+\end{enumerate}
+
+\section{代码工程质量}
+\label{sec:code_quality}
+
+为确保项目的可维护性和可靠性，本项目在代码工程层面实施了以下实践。
+
+\subsection{类型注解}
+
+所有核心模块均添加了Python类型注解（Type Hints），使用\texttt{typing}模块中的\texttt{Optional}、\texttt{list}、\texttt{dict}、\texttt{tuple}等类型标注。类型注解覆盖：
+
+\begin{itemize}
+  \item 函数参数和返回值类型；
+  \item 模块级常量类型；
+  \item 类实例变量类型。
+\end{itemize}
+
+类型注解有助于IDE代码补全、静态类型检查（如mypy）和代码可读性提升。
+
+\subsection{日志系统}
+
+使用Python标准库\texttt{logging}模块构建统一日志系统（\texttt{src/logger.py}），替代原有的\texttt{print}语句。日志系统特点：
+
+\begin{itemize}
+  \item 统一的日志格式：\texttt{时间戳 [级别] 模块名: 消息}；
+  \item 分模块日志器：API客户端、会话管理、图片处理各自独立；
+  \item 支持控制台和文件双输出，便于调试和问题追踪。
+\end{itemize}
+
+\subsection{自动化测试}
+
+使用pytest框架编写自动化测试，共3个测试文件、61个测试用例：
+
+\begin{table}[htbp]
+  \centering
+  \caption{测试覆盖情况}
+  \label{tab:test_coverage}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{测试文件} & \textbf{用例数} & \textbf{测试范围} \\
+    \hline
+    test\_api\_client.py & 18 & 消息构建、base64编码、API调用 \\
+    \hline
+    test\_chat\_manager.py & 28 & 会话管理、消息历史、持久化 \\
+    \hline
+    test\_image\_processor.py & 15 & 格式验证、大小验证、临时文件 \\
+    \hline
+    \textbf{合计} & \textbf{61} & --- \\
+    \hline
+  \end{tabular}
+\end{table}
+
+测试采用mock技术隔离外部依赖（如API调用、文件系统），确保测试的独立性和可重复性。所有测试均通过（\texttt{61 passed in 2.27s}）。
