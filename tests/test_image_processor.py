@@ -3,8 +3,7 @@
 """
 import os
 import pytest
-import tempfile
-from unittest.mock import patch, MagicMock
+from PIL import Image
 from src.image_processor import ImageProcessor
 
 
@@ -18,7 +17,7 @@ def processor():
 def temp_image(tmp_path):
     """创建临时图片文件"""
     image_path = tmp_path / "test.jpg"
-    image_path.write_bytes(b'\xff\xd8\xff\xe0' + b'\x00' * 100)  # JPEG header + data
+    Image.new("RGB", (10, 10), color="white").save(image_path, format="JPEG")
     return str(image_path)
 
 
@@ -34,7 +33,7 @@ def large_image(tmp_path):
 def png_image(tmp_path):
     """创建PNG图片文件"""
     image_path = tmp_path / "test.png"
-    image_path.write_bytes(b'\x89PNG\r\n\x1a\n' + b'\x00' * 100)  # PNG header + data
+    Image.new("RGB", (10, 10), color="white").save(image_path, format="PNG")
     return str(image_path)
 
 
@@ -89,7 +88,8 @@ class TestValidateImage:
     def test_valid_image(self, processor, temp_image):
         result, messages = processor.validate_image(temp_image)
         assert result is True
-        assert len(messages) == 2
+        assert len(messages) == 3
+        assert "内容校验通过" in messages[-1]
 
     def test_invalid_format_stops_early(self, processor, tmp_path):
         txt_path = tmp_path / "test.txt"
@@ -149,3 +149,13 @@ class TestGetImageInfo:
     def test_get_info_not_exists(self, processor):
         info = processor.get_image_info("/nonexistent/image.jpg")
         assert info is None
+
+
+class TestCleanupOldUploads:
+    """测试过期上传/临时文件清理"""
+
+    def test_cleanup_old_uploads(self, processor):
+        path = processor.save_temp_image(b"old", "old.jpg")
+        result = processor.cleanup_old_uploads(retention_seconds=0)
+        assert result >= 1
+        assert not os.path.exists(path)

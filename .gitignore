@@ -28,6 +28,9 @@ htmlcov/
 
 # 临时文件
 data/temp_images/
+data/uploads/
+data/sessions/*.db
+backups/
 *.tmp
 *.log
 

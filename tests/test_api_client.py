@@ -26,9 +26,9 @@ class TestInit:
     """测试初始化"""
 
     def test_init_uses_config_default(self):
-        from src.config import DASHSCOPE_API_KEY
-        client = VLMAPIClient()
-        assert client.api_key == DASHSCOPE_API_KEY
+        with patch.dict(os.environ, {"DASHSCOPE_API_KEY": "env-key"}):
+            client = VLMAPIClient()
+        assert client.api_key == "env-key"
 
     def test_init_with_param_key(self):
         client = VLMAPIClient(api_key="param-key")
@@ -42,6 +42,31 @@ class TestInit:
     def test_custom_model(self):
         client = VLMAPIClient(api_key="test-key", model_name="custom-model")
         assert client.model_name == "custom-model"
+
+    def test_allow_missing_key_for_frontend_custom_config(self):
+        client = VLMAPIClient(api_key="", allow_missing_key=True)
+        assert client.api_key == ""
+
+    def test_switch_to_custom_openai_compatible_config(self):
+        client = VLMAPIClient(api_key="test-key")
+
+        client.switch_model(
+            provider="custom",
+            model_name="custom-vlm",
+            base_url="https://example.com/v1/",
+            api_key="custom-key",
+        )
+
+        assert client.provider == "custom"
+        assert client.model_name == "custom-vlm"
+        assert client.base_url == "https://example.com/v1"
+        assert client.api_key == "custom-key"
+
+    def test_switch_custom_requires_config(self):
+        client = VLMAPIClient(api_key="test-key")
+
+        with pytest.raises(ValueError, match="自定义 API 地址不能为空"):
+            client.switch_model(provider="custom", model_name="custom-vlm", api_key="custom-key")
 
 
 class TestBuildMessages:
@@ -111,6 +136,15 @@ class TestEncodeImageToBase64:
         image_path.write_bytes(b'\x89PNG\r\n\x1a\n' + b'\x00' * 100)
         result = client.encode_image_to_base64(str(image_path))
         assert result.startswith("data:image/png;base64,")
+
+    def test_encode_uses_cache(self, client, tmp_path):
+        image_path = tmp_path / "cached.jpg"
+        image_path.write_bytes(b'\xff\xd8\xff\xe0' + b'\x00' * 100)
+        first = client.encode_image_to_base64(str(image_path))
+        with patch("builtins.open", mock_open(read_data=b"changed")) as mocked_open:
+            second = client.encode_image_to_base64(str(image_path))
+        assert second == first
+        mocked_open.assert_not_called()
 
 
 class TestCallAPI:
