@@ -1,0 +1,28 @@
+% !TeX encoding = UTF-8
+% !TeX program = xelatex
+
+\documentclass[
+    fontset=fandol,
+    degree=bachelor
+]{sysuthesis}
+
+% 加载宏包、全部的配置
+\input{sysusetup.tex}
+
+\begin{document}
+
+\maketitle
+
+\frontmatter
+\input{docs/abstract.tex}
+\tableofcontents
+
+\mainmatter
+\input{docs/chap01.tex}
+\input{docs/chap02.tex}
+\input{docs/chap03.tex}
+\input{docs/chap04.tex}
+
+\bibliography{reference}
+
+\end{document}
