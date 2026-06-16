@@ -26,8 +26,15 @@ env/
 .coverage
 htmlcov/
 
+# 前端构建
+frontend/node_modules/
+frontend/dist/
+
 # 临时文件
 data/temp_images/
+data/uploads/
+data/sessions/*.db
+backups/
 *.tmp
 *.log
 

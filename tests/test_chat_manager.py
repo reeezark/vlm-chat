@@ -97,6 +97,15 @@ class TestGetAllSessions:
         sessions = manager.get_all_sessions()
         assert sessions[0]['name'] == "新会话"
 
+    def test_filter_by_user_id(self, manager):
+        manager.create_session(name="用户A会话", user_id="user-a")
+        manager.create_session(name="用户B会话", user_id="user-b")
+
+        sessions = manager.get_all_sessions(user_id="user-a")
+
+        assert len(sessions) == 1
+        assert sessions[0]["name"] == "用户A会话"
+
 
 class TestDeleteSession:
     """测试删除会话"""
@@ -120,6 +129,14 @@ class TestDeleteSession:
     def test_delete_all_clears_current(self, manager, session_id):
         manager.delete_session(session_id)
         assert manager.current_session_id is None
+
+    def test_delete_rejects_other_user_session(self, manager):
+        sid = manager.create_session(name="用户A会话", user_id="user-a")
+
+        result = manager.delete_session(sid, user_id="user-b")
+
+        assert result is False
+        assert manager.get_session(sid, user_id="user-a") is not None
 
 
 class TestRenameSession:
@@ -225,3 +242,23 @@ class TestPersistence:
         session = new_manager.get_session(session_id)
         assert session is not None
         assert len(session['history']) == 2
+
+
+class TestAuditAndUsers:
+    """测试基础用户模型与审计日志"""
+
+    def test_upsert_user(self, manager):
+        user_id = manager.upsert_user("alice", role="admin")
+        assert user_id
+        same_user_id = manager.upsert_user("alice", role="user")
+        assert same_user_id == user_id
+
+    def test_create_session_writes_audit_log(self, manager):
+        sid = manager.create_session(name="审计测试")
+        logs = manager.get_audit_logs(session_id=sid)
+        assert any(log["action"] == "create_session" for log in logs)
+
+    def test_add_message_writes_audit_log(self, manager, session_id):
+        manager.add_message(session_id, "user", "你好")
+        logs = manager.get_audit_logs(session_id=session_id)
+        assert any(log["action"] == "add_message" for log in logs)
