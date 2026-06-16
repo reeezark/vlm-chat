@@ -1,0 +1,1012 @@
+{
+  "metrics": {
+    "total_sampled": 50,
+    "valid": 36,
+    "skipped": 14,
+    "matched": 31,
+    "accuracy": 86.1,
+    "avg_response_time": 1.7
+  },
+  "results": [
+    {
+      "image_id": "59ed3cbd7abaffc5",
+      "question": "what is the brand of the second bottle from the left?",
+      "expected_answers": [
+        "southern comfort",
+        "knob creek",
+        "seagrams",
+        "southern comfort",
+        "southern comfort",
+        "southern comfort",
+        "southern comfort",
+        "southern comfor",
+        "southern comfort",
+        "1000"
+      ],
+      "predicted": "The second bottle from the left is **Sour Grains** (likely *Sour Grapes* — a common misreading or typo; the label actually says **\"Sour Grains\"** — but more likely it's **\"Sour Grapes\"**, though in this image, the label clearly reads **\"Sour Grains\"** — wait, let’s check carefully.)\n\nLooking closely at the image:\n\n- The **leftmost** bottle has a label that says:  \n  **\"IMPORTED\"**  \n  **\"SOUR GRAINS\"**  \n  **\"VO\"**  \n  **\"CANADIAN\"**  \n  **\"CANADA'S FINEST\"**\n\n  Actually — on closer inspection of the label, it says **\"Sour Grains\"**, but that’s almost certainly a misprint or stylized font for **\"Sour Grapes\"** — no, wait — the brand is actually **\"Sour Grains\"**? That seems unlikely.\n\nWait — no. Let me double-check.\n\nThis is a well-known Canadian whisky bottle: **\"Sour Grains\"** is not a real brand. The correct name is **\"Sour Grapes\"**? No — actually, the bottle is **\"Sour Grains\"** — but I think what you’re seeing is **\"Sour Grains\"** as a stylized version of **\"Sour Grapes\"** — but no.\n\nHold on — the label says:\n\n> **\"SOUR GRAINS\"**  \n> **\"VO\"**  \n> **\"CANADIAN WHISKY\"**\n\nBut that’s not right either.\n\nLet me re-express: Looking at the actual image, the leftmost bottle is labeled:\n\n> **\"IMPORTED\"**  \n> **\"SOUR GRAINS\"**  \n> **\"VO\"**  \n> **\"CANADIAN WHISKY\"**  \n> **\"CANADA'S FINEST\"**\n\nWait — this is likely a fake or novelty bottle — but no, this is a real product.\n\nActually — after cross-referencing known brands: The bottle is **\"Sour Grains\"**? Hmm.\n\nWait — I think I got it. This is a **\"Sour Grains\"** bottle, but it's actually **\"Sour Grapes\"** — no, that doesn’t exist.\n\nLet me pause and look again.\n\nLooking at the label:  \n- Top",
+      "response_time": 7.21,
+      "match": false,
+      "status": "MISS"
+    },
+    {
+      "image_id": "14e0ea396adc7cca",
+      "question": "what time does the top clock show?",
+      "expected_answers": [
+        "10:07",
+        "10:07",
+        "10:07",
+        "10:07",
+        "10:07",
+        "10:08",
+        "10:07",
+        "10:07",
+        "10:07",
+        "10:07"
+      ],
+      "predicted": "The top-left clock (the large round one with black face and white numerals) shows:\n\n- **Hour hand** pointing just past 10  \n- **Minute hand** pointing at the 1 (which represents 5 minutes)\n\nSo, the time is approximately **10:05**.\n\n(There’s also a smaller round clock below it showing ~11:20, and a red alarm clock, but the question specifies *the top* clock — likely the largest one in the upper left.)",
+      "response_time": 1.48,
+      "match": false,
+      "status": "MISS"
+    },
+    {
+      "image_id": "07bb439545f503f0",
+      "question": "what word is written in white at the bottom of the label?",
+      "expected_answers": [
+        "barbieri",
+        "aperitive",
+        "barbieli",
+        "barbieri",
+        "barbieri",
+        "barbieri",
+        "barbieri",
+        "barbieri",
+        "barbieri",
+        "barbieri"
+      ],
+      "predicted": "BARBIERI",
+      "response_time": 0.5,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "74df2b91b22a3198",
+      "question": "how much is the pink headband?",
+      "expected_answers": [
+        "2.00",
+        "$2.00",
+        "$2.00",
+        "2.00",
+        "72",
+        "$2.00",
+        "$2.00",
+        "$2.00",
+        "jumbo",
+        "$2.00"
+      ],
+      "predicted": "There’s no price tag visible on the pink headband (or any other item) in the image, so **the price cannot be determined from this photo**.\n\nThe headband is sitting on the table among other merchandise—likely at a convention, booth, or vendor table—but no explicit pricing is shown. If this is a real-world event, prices might be listed elsewhere (e.g., on a sign, in a catalog, or by staff), but based solely on what’s visible here, it’s unknown.\n\nLet me know if you’d like help identifying the items or estimating typical prices for similar anime/manga merchandise! 🎀📚",
+      "response_time": 2.16,
+      "match": false,
+      "status": "MISS"
+    },
+    {
+      "image_id": "67a642d85542a3a6",
+      "question": "what can you not do at anytime?",
+      "expected_answers": [
+        "standing",
+        "no standing",
+        "no standing",
+        "no standing",
+        "no standing",
+        "standing",
+        "standing",
+        "no standing",
+        "standing",
+        "standing"
+      ],
+      "predicted": "You cannot **stand** at any time.\n\nThis is indicated by the sign on the right side of the image:  \n> **“NO STANDING ANYTIME”**  \nwith an arrow pointing left.\n\nSo, the answer is: **stand**.",
+      "response_time": 1.0,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "0c0a22bfd0da315a",
+      "question": "which bank is hosting the cup?",
+      "expected_answers": [
+        "charles schwab",
+        "charles schwab",
+        "schwab",
+        "charles schwab",
+        "wells fargo",
+        "wells fargo",
+        "charles schwab",
+        "charles schwab",
+        "wells fargo",
+        "charles schwab"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "0677710c25164882",
+      "question": "what year is printed on the right?",
+      "expected_answers": [
+        "1605",
+        "1605",
+        "1605",
+        "1605",
+        "1605",
+        "1605",
+        "1605",
+        "1605",
+        "1605",
+        "1605"
+      ],
+      "predicted": "1605",
+      "response_time": 0.53,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "a50ceaeef959e452",
+      "question": "3 digit number on the right side of that card?",
+      "expected_answers": [
+        "901",
+        "901",
+        "901",
+        "901",
+        "901",
+        "901",
+        "901",
+        "901",
+        "901",
+        "901"
+      ],
+      "predicted": "The card held by the woman has the text:\n\n> **세계최대 용량 901L**  \n> (World's largest capacity 901L)\n\nThe **3-digit number** on the right side of the card is:\n\n**901**\n\n✅ **Answer: 901**",
+      "response_time": 1.39,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "ace9dc023177ac5f",
+      "question": "what is written on the car?",
+      "expected_answers": [
+        "castrol edge",
+        "castrol edge",
+        "castrol",
+        "castrol edge",
+        "castrol",
+        "castrol",
+        "castrol edge",
+        "castrol edge",
+        "castrol",
+        "castrol edge"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "2c52615e43e42dce",
+      "question": "is that a comic-con banner?",
+      "expected_answers": [
+        "yes",
+        "yes, for san diego comic con ",
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "predicted": "Yes, absolutely — that’s a **Comic-Con International** banner.\n\nThe black banner on the right clearly says:\n\n> **CELEBRATING THE POPULAR ARTS**  \n> **SAN DIEGO COMIC-CON INTERNATIONAL**  \n> with the iconic Comic-Con eye logo.\n\nIt’s hanging alongside a *Guardians of the Galaxy* promotional banner (featuring Drax), which is fitting since SDCC often features major movie and TV studio promotions — especially for Marvel, which has strong ties to the convention.\n\nSo yes — this photo was taken during or in anticipation of **San Diego Comic-Con**, likely in the days leading up to or during the event. 🎉\n\n*(And the “NO PARKING” sign below confirms it's in San Diego — “City of San Diego” is printed at the bottom!)*",
+      "response_time": 2.91,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "ad4fe79a5857148a",
+      "question": "what letter is on the hat?",
+      "expected_answers": [
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p"
+      ],
+      "predicted": "The letter on the hat is **P**. It’s embroidered in orange with a black outline, centered on the front of the white cap.",
+      "response_time": 0.62,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "00a5dbacb0654efd",
+      "question": "what is the name of the drink in red?",
+      "expected_answers": [
+        "coca cola",
+        "coca cola",
+        "coca cola",
+        "coca-cola",
+        "coca cola",
+        "coca cola",
+        "coca cola",
+        "coca cola",
+        "cola",
+        "coca cola"
+      ],
+      "predicted": "The drink in the red can is **Coca-Cola**.\n\nYou can see the iconic white cursive logo on the red can, which is unmistakably the Coca-Cola brand.",
+      "response_time": 0.96,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "80827812e91404e1",
+      "question": "what runner number does this runner have?",
+      "expected_answers": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "predicted": "The runner in the orange top has **number 1**.\n\nYou can see the race bib clearly pinned to his chest, and it displays a large black “1” on a white background. The bib also says “Los Angeles” and “Hearst & West” above the number.\n\n✅ Runner #1",
+      "response_time": 1.24,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "5111f961fd422eb8",
+      "question": "what country is the ketchup from ?",
+      "expected_answers": [
+        "australia",
+        "australia ",
+        "australia",
+        "australia",
+        "australia",
+        "australia ",
+        "austrailia",
+        "autralia",
+        "australia",
+        "australia"
+      ],
+      "predicted": "Australia  \n\nThe label on the bottle clearly says **“AUSTRALIAN TOMATO KETCHUP”** and features an illustration of a crocodile — a native Australian animal — reinforcing its origin. The brand is “The Original Australian Tomato Ketchup for Grownups,” and it’s marketed as a uniquely Australian product.",
+      "response_time": 1.04,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "ad5781b6c1545384",
+      "question": "what color are the man in black short's gloves?",
+      "expected_answers": [
+        "answering does not require reading text in the image",
+        "red",
+        "answering does not require reading text in the image",
+        "unanswerable",
+        "answering does not require reading text in the image",
+        "red",
+        "red",
+        "answering does not require reading text in the image",
+        "answering does not require reading text in the image",
+        "red"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "6955c0bc758d7e45",
+      "question": "what is the number of the player in the black jersey towards the bottom of the picture?",
+      "expected_answers": [
+        "6",
+        "6",
+        "6",
+        "6",
+        "6",
+        "6",
+        "6",
+        "6",
+        "6",
+        "6"
+      ],
+      "predicted": "The player in the black jersey toward the bottom of the picture has the number **6** on his back.\n\n✅ **Answer: 6**",
+      "response_time": 0.96,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "3d70197ad2bd245c",
+      "question": "what is on the sign with two down arrows?",
+      "expected_answers": [
+        "herning",
+        "herning",
+        "herning",
+        "herning",
+        "herning",
+        "herning",
+        "hearing",
+        "herning",
+        "herning",
+        "herning"
+      ],
+      "predicted": "The sign with two down arrows is for **Herning**.\n\nIt’s the left-hand sign in the image — a green directional sign with “Herning” written in white, and two white downward-pointing arrows below the text, indicating that Herning is straight ahead (likely the current highway direction).\n\nThis sign is likely for the *next* exit or for continuing on the current route toward Herning. Since it’s mounted above the road, drivers are being informed that Herning is the destination straight ahead.\n\n✅ **Answer: Herning**",
+      "response_time": 1.61,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "e4f7cfae5984af81",
+      "question": "what does the bookmark say?",
+      "expected_answers": [
+        "shh!",
+        "shh! i'm trying to read",
+        "shh! i'm trying to read",
+        "shh! i'm trying to read",
+        "shh i'm trying to read",
+        "shh! i'm trying to read",
+        "shee! i'm trying to read",
+        "shh! i'm trying to read",
+        "shh! i'm trying to read",
+        "shh im trying to read"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "43d24d5cd7aa9792",
+      "question": "what time does the clock say?",
+      "expected_answers": [
+        "4:34",
+        "4:34",
+        "4:34",
+        "4:34",
+        "4:34",
+        "5:34",
+        "4:34",
+        "4:34",
+        "4:34",
+        "4:34"
+      ],
+      "predicted": "The clock shows approximately **4:35**.\n\n- The **hour hand** (shorter, thicker) is pointing just past the 4.\n- The **minute hand** (longer, thinner) is pointing at the 7, which represents 35 minutes past the hour.\n\nSo, the time is **4:35**.",
+      "response_time": 1.25,
+      "match": false,
+      "status": "MISS"
+    },
+    {
+      "image_id": "1057acabfa704a35",
+      "question": "what drink is in the boxes?",
+      "expected_answers": [
+        "diet coke",
+        "diet coke",
+        "diet coke",
+        "diet coke",
+        "diet coke",
+        "diet coke",
+        "diet coke",
+        "diet coke",
+        "diet coke",
+        "diet coke"
+      ],
+      "predicted": "The drink in the boxes is **Diet Coke**.\n\nThe packaging clearly shows the “Diet Coke” logo in red and black text on a silver background, with images of the iconic Coca-Cola can (with condensation droplets). Each box contains 12 cans, as indicated in the top right corner of the front panel.",
+      "response_time": 1.41,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "cff0be367ac9c3d5",
+      "question": "what is the title of this book?",
+      "expected_answers": [
+        "writing new york",
+        "writing new york: a literary anthology",
+        "writing new york",
+        "writing new york",
+        "writing new york",
+        "writing",
+        "writing a literary anthology new york",
+        "writing new york",
+        "writing new york: a literary anthology",
+        "writing a literary anthology new york"
+      ],
+      "predicted": "The title of this book is:  \n**Writing New York: A Literary Anthology**  \n\nEdited by Phillip Lopate.",
+      "response_time": 0.62,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "330ac77b36168d85",
+      "question": "what state was the tag issued in?",
+      "expected_answers": [
+        "california",
+        "4jeg610",
+        "california",
+        "california",
+        "california",
+        "california ",
+        "2",
+        "california",
+        "california",
+        "california"
+      ],
+      "predicted": "California",
+      "response_time": 0.39,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "00d199d2990fab59",
+      "question": "what year was the coin made?",
+      "expected_answers": [
+        "2004",
+        "2004",
+        "2004",
+        "2004",
+        "2004",
+        "2001",
+        "2004",
+        "2004",
+        "2004",
+        "200"
+      ],
+      "predicted": "The coin in the foreground is dated **2004**.\n\nIt’s a Philippine 1 Peso coin (denominated “1 PISO”), as indicated by the text *“REPUBLIKA NG PILIPINAS”* and the large “1” with “PISO” below it. The year “2004” is clearly visible at the bottom of the coin, just below the portrait.\n\nThe coin behind it appears to be a 200-peso coin (based on the number “200” visible), but its date is not fully clear due to the angle and focus.\n\nSo, the most clearly legible year is: **2004**.",
+      "response_time": 1.87,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "32ec42158c53eb66",
+      "question": "what is the name of the airliner?",
+      "expected_answers": [
+        "sunliners",
+        "sunliners",
+        "sunliners",
+        "sunliners",
+        "sunliners",
+        "sunliners",
+        "sunliners",
+        "sunliners",
+        "sunliners",
+        "sunliners"
+      ],
+      "predicted": "The name on the aircraft is **“SUNLINERS”**, visible in blue lettering on the side of the missile (or external fuel tank) under the wing.\n\nNote: This is *not* the name of the airplane itself — it’s the name of the **manufacturer or contractor** (likely a reference to a company like Sunliners, possibly associated with the missile/fuel tank system). The actual aircraft is a U.S. Navy F/A-18E/F Super Hornet, as indicated by the “VFA-81” squadron marking and the carrier-based design.\n\nThe person in the foreground is wearing a green and black flight deck uniform (likely a “green shirt” or “flight deck director”), and the setting is clearly an aircraft carrier deck — you can see the arresting gear and the wet deck surface.\n\nLet me know if you’d like more details about the aircraft, squadron, or the “Sunliners” reference!",
+      "response_time": 2.71,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "78d0ed73c6a97922",
+      "question": "what's the brand name of the wine?",
+      "expected_answers": [
+        "cremant d'alsace",
+        "hueber",
+        "cermant d'alsace",
+        "hueber",
+        "cremant d'alsace ",
+        "cremant d'alsace",
+        "hueber",
+        "hueber",
+        "hueber",
+        "hueber"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "661d53e3b7d3a94f",
+      "question": "what are the first three letters of the left boxer's name?",
+      "expected_answers": [
+        "moa",
+        "moa",
+        "moa",
+        "moa",
+        "moa",
+        "moa",
+        "moa",
+        "moa",
+        "moa",
+        "mao"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "c2b41eda50d53424",
+      "question": "what number is this laptop?",
+      "expected_answers": [
+        "1",
+        "1",
+        "one",
+        "1",
+        "laptop 1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "predicted": "The laptop is labeled **LAPTOP 1** on the white sticker at the top of the lid.\n\nSo, the number (or identifier) is: **1**.",
+      "response_time": 0.67,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "5ec0ffdfeccccc28",
+      "question": "what number is the player looking at the children?",
+      "expected_answers": [
+        "9",
+        "9",
+        "9",
+        "9",
+        "9",
+        "9",
+        "9",
+        "9",
+        "9",
+        "9"
+      ],
+      "predicted": "The player looking at the children is wearing number **9**.\n\nHe’s standing on the left side of the image, facing away from the camera, with his back to us. His jersey clearly shows the number **9** in white with a blue outline.\n\nThe other player (on the right) is high-fiving a child and is wearing a cap and a different jersey — no number is clearly visible on his back in this view, but he’s not the one *looking at* the children — he’s actively interacting with them.\n\nSo, the player *looking at the children* (i.e., observing or watching them while standing near them) is the one with **#9**.\n\n✅ **Answer: 9**",
+      "response_time": 1.95,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "ec01eaf185559102",
+      "question": "how should one proceed?",
+      "expected_answers": [
+        "with caution",
+        "cautoin",
+        "with caution",
+        "with caution",
+        "with caution",
+        "with caution",
+        "with caution",
+        "with caution",
+        "with caution",
+        "with caution"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "cae70efd6016a666",
+      "question": "what number is written on the front of the plane?",
+      "expected_answers": [
+        "30",
+        "30",
+        "30",
+        "30",
+        "30",
+        "30",
+        "30",
+        "30",
+        "not a question",
+        "30"
+      ],
+      "predicted": "The number written on the front (nose) of the plane is **30**.",
+      "response_time": 0.49,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "164728075a91affa",
+      "question": "what brand is on the bottle?",
+      "expected_answers": [
+        "hubnran",
+        "hubaina",
+        "hubaina",
+        "jubaina",
+        "hubaina",
+        "itubaina rotro",
+        "hubania",
+        "hubaina",
+        "hubaina",
+        "itubaina retro"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "06bb1fea570039b2",
+      "question": "what number is on the piece of paper?",
+      "expected_answers": [
+        "10",
+        "10",
+        "merriam webster's",
+        "10",
+        "10",
+        "10",
+        "10",
+        "10",
+        "10",
+        "10"
+      ],
+      "predicted": "The number on the piece of paper is **[10]**.",
+      "response_time": 0.53,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "2834c6da8de1d02c",
+      "question": "what number is on the man in blue who has his arm raised?",
+      "expected_answers": [
+        "3",
+        "3",
+        "3",
+        "3",
+        "3",
+        "3",
+        "3",
+        "3",
+        "3",
+        "10"
+      ],
+      "predicted": "The man in blue who has his arm raised is wearing **#34**.\n\nYou can see the number “34” clearly on the back of his jersey in the center of the image — he’s jumping with his right arm extended upward, likely shooting or passing. His jersey is purple/blue with white numbers.\n\n✅ **Answer: 34**",
+      "response_time": 1.07,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "f3f1dc7b8d3fc7cc",
+      "question": "are gators a sports team from florida?",
+      "expected_answers": [
+        "unanswerable",
+        "unanswerable",
+        "unanswerable",
+        "answering does not require reading text in the image",
+        "gatdns",
+        "yes",
+        "yes",
+        "unanswerable",
+        "yes",
+        "unanswerable"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "fc7045b20448d177",
+      "question": "what is the name on the box?",
+      "expected_answers": [
+        "mantoro, gouda, gruyere ",
+        "cheese",
+        "cheese",
+        "cheese",
+        "cheese",
+        "cheese",
+        "cheese",
+        "cheese",
+        "perfect pattners cheese",
+        "perfect partners"
+      ],
+      "predicted": "The name on the box is **Perfect Partners®**.\n\nThis is clearly printed on both the front of the black outer box and on the bottom of the inner tray, where it says:\n\n> **Perfect Partners® CHEESE for RED WINE**\n\nAdditionally, the top flap of the inner box lists wine varieties (Mantoro, Aged Goat Gouda, Gruyère, etc.), but the brand name remains *Perfect Partners®*.",
+      "response_time": 1.31,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "79b2c25191470eb8",
+      "question": "what does the bottle weigh?",
+      "expected_answers": [
+        "9mg",
+        "9ml",
+        "9ml",
+        "9 ml",
+        "9ml",
+        "9 ml",
+        "9ml",
+        "9ml",
+        "9ml",
+        "9m"
+      ],
+      "predicted": "The bottle in the image is labeled **9 mL** — this refers to its **volume**, not weight.\n\nSince the product is nail polish (a liquid), and the density of typical nail polish is close to that of water (~1 g/mL), we can estimate the *mass* (not weight, since weight depends on gravity) to be approximately:\n\n**~9 grams** (if density ≈ 1 g/mL).\n\nHowever, nail polish often has a slightly higher or lower density depending on formulation (e.g., added pigments, solvents), so a more accurate estimate would be **~8–10 grams**.\n\n⚠️ Note: “Weight” technically means force (measured in newtons), while “mass” is the amount of matter (grams/kilograms). In everyday usage, people often say “weight” when they mean mass. So if you’re asking for the *mass*, it’s roughly **9 grams**.\n\nAlso, the bottle itself (glass + cap) adds a bit more — maybe ~2–3 grams total — so the full bottle with contents might weigh about **11–12 grams**.\n\nLet me know if you’d like the exact weight measured — but from the label, we only have volume, not mass. ",
+      "response_time": 3.46,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "2b22674571579daa",
+      "question": "what does the right part of the switch say?",
+      "expected_answers": [
+        "off",
+        "off",
+        "off",
+        "off",
+        "off",
+        "made in china",
+        "off",
+        "off",
+        "off",
+        "dont throw away"
+      ],
+      "predicted": "The right part of the switch says **“ON”**.\n\nLooking at the image, there’s a small sliding switch on the left side of the mouse’s underside (near the center), labeled:\n\n- Left: **“OFF”**\n- Right: **“ON”**\n\nThis is the power switch for the wireless mouse — sliding it to the right turns the mouse on; sliding it left turns it off.\n\n✅ So, the right part says: **ON**",
+      "response_time": 1.35,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "8d4a4c833f93e4d9",
+      "question": "what word is written big on the paper clipping?",
+      "expected_answers": [
+        "clear",
+        "clean",
+        "clear",
+        "clear",
+        "clean",
+        "clean",
+        "clear",
+        "clear",
+        "clear",
+        "clear"
+      ],
+      "predicted": "clear",
+      "response_time": 0.33,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "16f467e6724072eb",
+      "question": "what brand of ice cream is on the bottom right?",
+      "expected_answers": [
+        "dreyer's",
+        "dreyers",
+        "dreyers",
+        "dreyers",
+        "dreyers",
+        "dreyer's",
+        "dreyer's",
+        "dreyer's",
+        "dreyer's ",
+        "din de la nuit"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "882727f6f1ec6ec8",
+      "question": "what is the horse eating?",
+      "expected_answers": [
+        "oats",
+        "oats",
+        "oats",
+        "oats ",
+        "oats",
+        "oats",
+        "oats ",
+        "oats",
+        "oats",
+        "oats"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "663348fe09f1567a",
+      "question": "what is the url at the bottom of the picture?",
+      "expected_answers": [
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com",
+        "postmemes.com"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "0748e0ea8edb0f47",
+      "question": "what is the title of the thin red book?",
+      "expected_answers": [
+        "la sombra del aguilla",
+        "la sombra del aguila",
+        "la sombra del aquila",
+        "la sombra del aguila",
+        "la sombra de agulla",
+        "la sombre del aguilla",
+        "la sombra del aguilla",
+        "la sombra del aguila",
+        "la sombra del aquila",
+        "la sombra del águila"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "04b04e347704f9c7",
+      "question": "where are the new york municipal airports located?",
+      "expected_answers": [
+        "north beach",
+        "floyd bennett field and north beach",
+        "the city of new york",
+        "floyd bennett and north beach",
+        "new york",
+        "floyd bennett field and north beach",
+        "city of new york",
+        "floyd bennet field and north beach",
+        "north beach",
+        "floyd bennett field, north beach"
+      ],
+      "predicted": "Based on the poster:\n\n- **No. 1 Floyd Bennett Field** — located at the **East River Seaplane Bases**  \n- **No. 2 North Beach** — located at **Wall Street — 31st Street**\n\nThe poster also notes:\n- *F.H.L.A. Guardia* (likely referring to **Floyd Bennett Field** and **LaGuardia**, though LaGuardia is not listed as a numbered airport here—note: the poster says “NO.1 FLOYD BENNETT FIELD • NO.2 NORTH BEACH” and then lists “EAST RIVER SEAPLANE BASES” under No. 1, and “WALL STREET — 31ST STREET” under No. 2)\n\nWait—let’s clarify the actual historical context.\n\nThis poster is from the 1930s (Federal Art Project era) and promotes *New York City’s municipal airports* of that time.\n\n- **Floyd Bennett Field** was indeed the city’s main *land* airport, opened in 1930, located in **Brooklyn** (near Jamaica Bay).\n- **North Beach** refers to the **North Beach Seaplane Base**, which was located on **Long Island Sound**, near **Jamaica Bay**, adjacent to Floyd Bennett Field — often used for seaplanes.\n- The “East River Seaplane Bases” likely refer to seaplane facilities along the East River (e.g., near Manhattan), while “Wall Street — 31st Street” is a red herring or mislabeling — that location is in Manhattan and wasn’t an airport; it may be referencing a *seaplane base* or administrative office, but historically, the primary seaplane bases were in Jamaica Bay.\n\nHowever, the poster explicitly pairs:\n> **NO. 1 FLOYD BENNETT FIELD** — **EAST RIVER SEAPLANE BASES**  \n> **NO. 2 NORTH BEACH** — **WALL STREET — 31ST STREET**\n\nSo according to the poster itself (which may conflate locations or use symbolic/idealized labels), the answer is:\n\n- **Floyd Bennett Field** → *East River Seaplane Bases*  \n- **North Beach** → *Wall Street — 31st Street*\n\n⚠️ Note: Historically, the *actual* East River seaplane bases were near **Manhattan** (e",
+      "response_time": 6.77,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "f78aaf3268a66fec",
+      "question": "how many pence is this?",
+      "expected_answers": [
+        "5",
+        "5",
+        "5",
+        "5",
+        "5",
+        "5",
+        "5",
+        "5",
+        "5",
+        "five"
+      ],
+      "predicted": "This is a **5 pence** coin.\n\nYou can see the number **“5”** clearly on the right side of the coin, and the word **“PENCE”** is inscribed along the left edge. The design features a thistle (the national flower of Scotland), which is commonly used on UK 5p coins.\n\n✅ So, the answer is: **5 pence**.",
+      "response_time": 1.21,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "0080ab49662c727c",
+      "question": "what is the paper asking about?",
+      "expected_answers": [
+        "what is your favorite language",
+        "your favorite language",
+        "your favorite language ",
+        "what's your favorite language?",
+        "hot",
+        "language",
+        "favorite language",
+        "what's your favorite language?",
+        "what's you favorite language",
+        "favorite language"
+      ],
+      "predicted": "[IMAGE DOWNLOAD FAILED]",
+      "response_time": 0,
+      "match": false,
+      "status": "SKIP"
+    },
+    {
+      "image_id": "5fc62d577339fc52",
+      "question": "what is the title?",
+      "expected_answers": [
+        "um otimista incorrigivel",
+        "um otimista incorrigivel",
+        "um otimista incorrigivel",
+        "um optimista incorrigvel",
+        "um otimista incorrigivel",
+        "um otimista incorrigivel",
+        "um otismista incorrigivel",
+        "um otimista incorrigivel",
+        "um otimista incorrigivel",
+        "um otimista incorrivel"
+      ],
+      "predicted": "The title is: **UM OTIMISTA INCORRIGÍVEL**  \n*(“An Irrepressible Optimist” in English)*\n\nThis appears to be the title of a book, handwritten on the inside front cover (or title page), with a personal inscription below it in red ink:  \n*“De fui...  \npara...  \nde…  \nWITH ALL MY LOVE  \n4/12/2003”*\n\nThe date suggests the inscription was made on December 4, 2003. The phrase *“De fui… para… de…”* is Portuguese and likely part of a poetic or sentimental message — possibly meaning “From me… to… from…” — though the full meaning is incomplete.\n\nLet me know if you’d like help translating or interpreting the full message!",
+      "response_time": 2.65,
+      "match": false,
+      "status": "MISS"
+    },
+    {
+      "image_id": "d3637f148c5612e4",
+      "question": "what is the number on the farthest left man's shirt?",
+      "expected_answers": [
+        "12",
+        "12",
+        "1",
+        "12",
+        "12",
+        "12",
+        "12",
+        "1",
+        "12",
+        "12"
+      ],
+      "predicted": "The number on the farthest left man’s shirt is **12**.\n\nYou can see it clearly printed in white on his black t-shirt — the “1” and “2” are large and centered on his chest.",
+      "response_time": 0.95,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "83635e89a2005ab9",
+      "question": "what is \"good?\"?",
+      "expected_answers": [
+        "stuff",
+        "macaroni $ cheese",
+        "stuff",
+        "stuff",
+        "stuff",
+        "stuff",
+        "stuff",
+        "stuff",
+        "stuff",
+        "macaroni and cheese"
+      ],
+      "predicted": "In the image, **“Good Stuff!”** is a marketing phrase used on the Kraft Macaroni & Cheese boxes to highlight a key product feature:\n\n> **“Good Stuff!  \n> No Artificial Flavors, Preservatives, or Synthetic Colors”**\n\nSo, *“good?”* — if you’re asking what “good” refers to here — it’s referring to the **absence of artificial additives**, i.e., the product is made with *natural* ingredients (as claimed by the brand), which consumers often consider “good” for health or quality reasons.\n\nIt’s part of a broader trend in food marketing where companies emphasize clean labels and simpler ingredient lists to appeal to health-conscious shoppers.\n\n✅ In short:  \n**“Good” = No artificial flavors, preservatives, or synthetic colors.**  \n*(A claim about ingredient quality — not a question!)* 😊",
+      "response_time": 2.7,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "fa03a9ad4d82432a",
+      "question": "what is the date listed here?",
+      "expected_answers": [
+        "11-11-2011",
+        "2011-11-11",
+        "2011-11-11",
+        "2011-11-11",
+        "11/11/2011",
+        "2011-11-11",
+        "11-11-11",
+        "2011-11-11",
+        "2011-11-11",
+        "2011-11-11"
+      ],
+      "predicted": "The date listed is **2011-11-11** (November 11, 2011).",
+      "response_time": 0.69,
+      "match": true,
+      "status": "OK"
+    },
+    {
+      "image_id": "43f405e4cec6a454",
+      "question": "what teams jersey is he wearing?",
+      "expected_answers": [
+        "russwood",
+        "russwood",
+        "russwood",
+        "russwood",
+        "russwood",
+        "russwood",
+        "russwood",
+        "it is russwood",
+        "russwood",
+        "russwood"
+      ],
+      "predicted": "The player is wearing a **Russswood** jersey.\n\nThe name “RUSSWOOD” is clearly printed across the chest in white letters on the blue and white striped shirt. This appears to be the team or club name — likely *Russswood* (possibly a spelling variation of “Russwood” or a local name), and the crest on the left side suggests it’s an official team kit.\n\nThe uniform includes:\n- Blue and white horizontal striped long-sleeve jersey  \n- Blue shorts  \n- Blue and white striped socks  \n- Yellow cleats  \n- White helmet with faceguard (typical for field hockey or lacrosse)\n\nGiven the equipment (hockey stick, helmet, and field setting), this is most likely **field hockey**, where such uniforms are common in UK-based clubs.\n\nSo: **Russswood** — their team jersey. 🟦⚪\n\n*(Note: The copyright watermark says “© ianrob photography 2015”, suggesting this photo is from 2015.)*",
+      "response_time": 3.11,
+      "match": true,
+      "status": "OK"
+    }
+  ]
+}

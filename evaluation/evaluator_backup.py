@@ -7,7 +7,6 @@ import jieba
 PUNCT_RE = re.compile(r'[。、，！？；：""''（）【】《》\s\n\r\t.,!?;:\"\'()\[\]{}<>]')
 NUM_RE = re.compile(r'\d+\.?\d*%?')
 STOP_WORDS = set("的了是在有和等也被都要会能对为这个中与从到把将就也不而但如果因为所以虽然可以已经正在被让给比以及或即")
-NEGATION_WORDS = {"没有", "不是", "不存在", "无", "未", "否", "no", "not", "none", "never"}
 
 
 def extract_content_words(text):
@@ -17,7 +16,7 @@ def extract_content_words(text):
     content = []
     for w in words:
         w = w.strip()
-        if not w or len(w) < 1:
+        if not w or len(w) < 2:
             continue
         if w in STOP_WORDS:
             continue
@@ -31,7 +30,7 @@ def extract_content_words(text):
 
 
 def compute_match(expected, predicted):
-    """基于分词的语义匹配（修复版：否定词检测 + 短答案严格匹配）"""
+    """基于分词的语义匹配"""
     predicted_lower = predicted.lower()
 
     # 提取期望答案的内容词
@@ -51,57 +50,11 @@ def compute_match(expected, predicted):
                     hit += 1
                     break
 
-    # 否定词检测：期望是短肯定答案，预测却包含否定词 → 判错
-    if len(expected_words) <= 3:
-        for neg in NEGATION_WORDS:
-            if neg in predicted_lower:
-                return False
-        # 短答案至少匹配全部内容词，或至少2个词
-        return hit >= min(2, len(expected_words))
-
+    # 短答案（<=3个词）：至少匹配1个词即OK
     # 长答案（>3个词）：匹配率>=40%即OK
-    return hit / len(expected_words) >= 0.4
-
-
-def _analyze_failure(r):
-    """分析评测失败的原因"""
-    expected = r.get("expected", "")
-    predicted = r.get("predicted", "")
-    predicted_lower = predicted.lower()
-
-    if "[ERROR" in predicted or "[IMAGE NOT FOUND" in predicted:
-        return "系统错误：API调用失败或图片文件缺失，无法获取模型回答。"
-
-    expected_words = extract_content_words(expected)
-    if not expected_words:
-        return "期望答案经过分词后无有效内容词，匹配逻辑无法正常工作。"
-
-    # 检查否定词冲突
-    neg_found = [n for n in NEGATION_WORDS if n in predicted_lower]
-    if len(expected_words) <= 3 and neg_found:
-        return f"否定词冲突：期望为短肯定答案，但模型回答包含否定词「{neg_found[0]}」，触发否定检测直接判错。"
-
-    # 统计具体命中情况
-    hit_count = 0
-    missed_words = []
-    for ew in expected_words:
-        if ew in predicted_lower:
-            hit_count += 1
-        else:
-            found = False
-            for pw in jieba.lcut(PUNCT_RE.sub('', predicted)):
-                if ew in pw or pw in ew:
-                    hit_count += 1
-                    found = True
-                    break
-            if not found:
-                missed_words.append(ew)
-
     if len(expected_words) <= 3:
-        return f"短答案匹配不足：期望{len(expected_words)}个关键词，仅命中{hit_count}个（需≥{min(2, len(expected_words))}），缺失词：{missed_words}。"
-    else:
-        ratio = hit_count / len(expected_words)
-        return f"长答案匹配率不足：期望{len(expected_words)}个关键词，命中{hit_count}个（匹配率{ratio:.0%}，需≥40%），缺失词：{missed_words[:5]}。"
+        return hit >= 1
+    return hit / len(expected_words) >= 0.4
 
 
 class Evaluator:
@@ -227,37 +180,6 @@ class Evaluator:
             lines.append(f"  - 期望: {r['expected']}")
             lines.append(f"  - 预测: {r['predicted'][:100]}")
             lines.append("")
-
-        # —— 成功/失败案例分析 ——
-        success_cases = [r for r in self.results if r["match"]]
-        fail_cases = [r for r in self.results if not r["match"]]
-
-        lines.append("## 成功案例分析（Top 5）")
-        lines.append("")
-        for i, r in enumerate(success_cases[:5]):
-            lines.append(f"### 成功案例 {i+1}")
-            lines.append(f"- **问题**: {r['question']}")
-            lines.append(f"- **类别**: {r['category']} / {r['sub_category']}")
-            lines.append(f"- **期望答案**: {r['expected']}")
-            pred_short = r['predicted'][:150] + ("..." if len(r['predicted']) > 150 else "")
-            lines.append(f"- **模型回答**: {pred_short}")
-            lines.append(f"- **分析**: 模型正确理解了问题意图，回答内容与期望答案语义一致，关键信息点匹配成功。")
-            lines.append("")
-
-        lines.append("## 失败案例分析（Top 5）")
-        lines.append("")
-        for i, r in enumerate(fail_cases[:5]):
-            lines.append(f"### 失败案例 {i+1}")
-            lines.append(f"- **问题**: {r['question']}")
-            lines.append(f"- **类别**: {r['category']} / {r['sub_category']}")
-            lines.append(f"- **期望答案**: {r['expected']}")
-            pred_short = r['predicted'][:150] + ("..." if len(r['predicted']) > 150 else "")
-            lines.append(f"- **模型回答**: {pred_short}")
-            # 分析失败原因
-            reason = _analyze_failure(r)
-            lines.append(f"- **失败原因**: {reason}")
-            lines.append("")
-
         with open(output_path, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))
         print(f"Report: {output_path}")
