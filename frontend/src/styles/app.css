@@ -461,6 +461,40 @@ button {
   color: var(--accent-strong);
 }
 
+.model-config-status {
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.model-config-status strong {
+  color: var(--text);
+}
+
+.model-config-status.ok {
+  border-color: rgba(93, 151, 99, 0.35);
+  background: rgba(93, 151, 99, 0.08);
+}
+
+.model-config-status.error {
+  border-color: rgba(187, 62, 62, 0.28);
+  background: rgba(187, 62, 62, 0.08);
+  color: var(--danger);
+}
+
+.model-config-status small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .inline-label {
   display: inline-flex;
   align-items: center;

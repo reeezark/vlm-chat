@@ -3,6 +3,7 @@ import type {
   ChatMessage,
   ChatSession,
   KnowledgeBaseState,
+  ModelConfigValidationResult,
   ModelSettings,
 } from '../types';
 
@@ -19,6 +20,20 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   getConfig: () => requestJson<AppConfig>('/api/config'),
+
+  validateModelConfig: (settings: ModelSettings) =>
+    requestJson<ModelConfigValidationResult>('/api/model-config/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(modelSettingsPayload(settings)),
+    }),
+
+  testModelConfig: (settings: ModelSettings) =>
+    requestJson<ModelConfigValidationResult>('/api/model-config/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(modelSettingsPayload(settings)),
+    }),
 
   listSessions: async () => {
     const data = await requestJson<{ sessions: ChatSession[] }>('/api/sessions');
@@ -66,3 +81,14 @@ export const api = {
 
   getKnowledgeBase: () => requestJson<KnowledgeBaseState>('/api/knowledge-base'),
 };
+
+function modelSettingsPayload(settings: ModelSettings) {
+  return {
+    provider: settings.provider,
+    model: settings.model,
+    useCustomApi: settings.useCustomApi,
+    customBaseUrl: settings.customBaseUrl,
+    customApiKey: settings.customApiKey,
+    customModel: settings.customModel,
+  };
+}

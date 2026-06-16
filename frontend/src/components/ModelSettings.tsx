@@ -1,4 +1,4 @@
-import { KeyRound, Save, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { KeyRound, PlugZap, Save, ShieldCheck, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useChatStore } from '../hooks/useChatStore';
 
 export function ModelSettingsPanel() {
@@ -8,6 +8,10 @@ export function ModelSettingsPanel() {
     updateSettings,
     saveLocalApiConfig,
     clearLocalApiConfig,
+    validateModelConfig,
+    testModelConfig,
+    isTestingModelConfig,
+    modelConfigResult,
   } = useChatStore();
   const activeProvider = config?.providers.find((provider) => provider.id === settings.provider);
 
@@ -23,6 +27,7 @@ export function ModelSettingsPanel() {
         <select
           value={settings.provider}
           onChange={(event) => updateSettings({ provider: event.target.value })}
+          disabled={settings.useCustomApi}
         >
           {config?.providers.map((provider) => (
             <option value={provider.id} key={provider.id}>
@@ -109,6 +114,21 @@ export function ModelSettingsPanel() {
             清除配置
           </button>
         </div>
+        <div className="settings-actions">
+          <button type="button" className="ghost-action compact" onClick={validateModelConfig}>
+            <ShieldCheck size={14} />
+            校验配置
+          </button>
+          <button
+            type="button"
+            className="primary-action compact"
+            onClick={testModelConfig}
+            disabled={isTestingModelConfig}
+          >
+            <PlugZap size={14} />
+            {isTestingModelConfig ? '测试中...' : '测试连接'}
+          </button>
+        </div>
         <label>
           模型名称
           <input
@@ -117,6 +137,21 @@ export function ModelSettingsPanel() {
             onChange={(event) => updateSettings({ customModel: event.target.value })}
           />
         </label>
+      </div>
+      <div className={`model-config-status ${modelConfigResult?.ok ? 'ok' : modelConfigResult ? 'error' : ''}`}>
+        <strong>当前配置状态</strong>
+        {modelConfigResult?.summary ? (
+          <>
+            <span>{modelConfigResult.summary.label} / {modelConfigResult.summary.model}</span>
+            <small>{modelConfigResult.summary.baseUrl}</small>
+            <small>
+              Key 来源：{modelConfigResult.summary.keySource}
+              {modelConfigResult.latencyMs ? ` · ${modelConfigResult.latencyMs}ms` : ''}
+            </small>
+          </>
+        ) : (
+          <span>{modelConfigResult?.message ?? '尚未校验当前配置'}</span>
+        )}
       </div>
     </section>
   );

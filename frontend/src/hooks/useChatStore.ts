@@ -5,6 +5,7 @@ import type {
   ChatMessage,
   ChatSession,
   KnowledgeBaseState,
+  ModelConfigValidationResult,
   ModelSettings,
 } from '../types';
 
@@ -22,7 +23,9 @@ interface ChatState {
   knowledgeBase: KnowledgeBaseState;
   isBootstrapping: boolean;
   isSending: boolean;
+  isTestingModelConfig: boolean;
   toast: ToastState | null;
+  modelConfigResult: ModelConfigValidationResult | null;
   init: () => Promise<void>;
   createSession: () => Promise<void>;
   selectSession: (sessionId: string) => Promise<void>;
@@ -30,6 +33,8 @@ interface ChatState {
   updateSettings: (patch: Partial<ModelSettings>) => void;
   saveLocalApiConfig: () => void;
   clearLocalApiConfig: () => void;
+  validateModelConfig: () => Promise<void>;
+  testModelConfig: () => Promise<void>;
   sendMessage: (content: string, files: File[]) => Promise<void>;
   refreshKnowledgeBase: () => Promise<void>;
   clearToast: () => void;
@@ -93,7 +98,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   knowledgeBase: emptyKnowledgeBase,
   isBootstrapping: true,
   isSending: false,
+  isTestingModelConfig: false,
   toast: null,
+  modelConfigResult: null,
 
   init: async () => {
     try {
@@ -172,7 +179,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const provider = config.providers.find((item) => item.id === patch.provider);
       next.model = provider?.models[0] ?? '';
     }
-    set({ settings: next });
+    set({ settings: next, modelConfigResult: null });
   },
 
   saveLocalApiConfig: () => {
@@ -212,6 +219,41 @@ export const useChatStore = create<ChatState>((set, get) => ({
       },
       toast: { type: 'success', message: '本地配置已清除' },
     }));
+  },
+
+  validateModelConfig: async () => {
+    const { settings } = get();
+    try {
+      const result = await api.validateModelConfig(settings);
+      set({
+        modelConfigResult: result,
+        toast: { type: result.ok ? 'success' : 'error', message: result.message },
+      });
+    } catch (error) {
+      set({
+        modelConfigResult: null,
+        toast: { type: 'error', message: error instanceof Error ? error.message : '配置校验失败' },
+      });
+    }
+  },
+
+  testModelConfig: async () => {
+    const { settings } = get();
+    set({ isTestingModelConfig: true, toast: null });
+    try {
+      const result = await api.testModelConfig(settings);
+      set({
+        isTestingModelConfig: false,
+        modelConfigResult: result,
+        toast: { type: result.ok ? 'success' : 'error', message: result.message },
+      });
+    } catch (error) {
+      set({
+        isTestingModelConfig: false,
+        modelConfigResult: null,
+        toast: { type: 'error', message: error instanceof Error ? error.message : '连接测试失败' },
+      });
+    }
   },
 
   sendMessage: async (content, files) => {

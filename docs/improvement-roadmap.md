@@ -484,6 +484,7 @@ src/
 | RAG 入库健壮性修复 | 8 | 修复 PDF 抽取文本包含非法 Unicode 代理字符时 embedding/SQLite 写入失败的问题，并清理 0 切片脏文档 | 单测覆盖异常 Unicode 入库和空文档清理，当前本地脏数据已清理 |
 | OpenAI 兼容环境变量配置修复 | 2 | 修复 `.env` 中 OpenAI 兼容 URL/API Key/模型名未被默认调用链正确选用的问题，并补充 `.env.example` | 解析结果确认走 `openai` Provider，质量门禁通过 |
 | 前端本地配置保存 | 3 | React 前端支持将自定义 API 地址和 API Key 保存到 `localStorage`，并在再次访问时自动回填 | 前端构建通过，质量门禁通过 |
+| 模型配置 P0 架构优化 | 2 / 3 / 9 | 新增统一运行时模型配置对象、配置校验、错误分类、安全摘要和 `/api/model-config/*` 接口，React 前端支持校验与测试连接 | 单测覆盖配置解析和错误分类，前端构建通过 |
 
 ### 16.2 部分完成
 
@@ -519,3 +520,4 @@ src/
 - RAG 入库现在会清洗 PDF 抽取文本中的非法 Unicode 字符，并以事务方式写入文档和切片，避免出现“文档已入库但无切片可检索”的状态。
 - OpenAI 兼容 Provider 现在支持通过 `MODEL_NAME`、`OPENAI_MODEL_NAME` 或 `OPENAI_MODELS` 配置默认模型和前端模型列表；`.env` 已切换为 `DEFAULT_PROVIDER=openai`。
 - React 前端的自定义 API 地址和 API Key 可保存到浏览器 `localStorage`，便于个人设备重复访问时自动回填；该 Key 为浏览器本地明文存储。
+- 模型配置已新增统一解析与校验层，React 前端可在发送消息前独立执行“校验配置”和“测试连接”，配置摘要不会返回 API Key 原文。

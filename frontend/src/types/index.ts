@@ -2,6 +2,8 @@ export interface ProviderConfig {
   id: string;
   label: string;
   models: string[];
+  requiresApiKey?: boolean;
+  baseUrl?: string;
 }
 
 export interface AppConfig {
@@ -37,6 +39,26 @@ export interface ModelSettings {
   customBaseUrl: string;
   customApiKey: string;
   customModel: string;
+}
+
+export interface ModelConfigSummary {
+  provider: string;
+  label: string;
+  model: string;
+  baseUrl: string;
+  isCustom: boolean;
+  keySource: string;
+  hasApiKey: boolean;
+  configHash: string;
+}
+
+export interface ModelConfigValidationResult {
+  ok: boolean;
+  errorCode: string;
+  message: string;
+  detail?: string;
+  latencyMs?: number;
+  summary?: ModelConfigSummary | null;
 }
 
 export interface KnowledgeDocument {

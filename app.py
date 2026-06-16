@@ -18,10 +18,15 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import gradio as gr
 
-from src.api_client import VLMAPIClient, normalize_provider, provider_requires_api_key
+from src.api_client import VLMAPIClient
 from src.chat_manager import ChatManager
 from src.image_processor import ImageProcessor
 from src.metrics import MetricsCollector
+from src.model_config import (
+    ModelConfigError,
+    resolve_runtime_model_config,
+    test_runtime_model_config,
+)
 from src.rag import RagManager
 from src.tools import set_tool_audit_hook
 from src.config import (
@@ -545,43 +550,26 @@ class VLMChatAssistant:
     ) -> tuple[bool, str, str, str, Optional[VLMAPIClient]]:
         """应用模型配置到当前会话客户端，返回 (成功, 错误消息, 实际 provider, 实际 model, client)。"""
         api_client = self._api_client_for_session(session_id)
-        if use_custom_api:
-            actual_provider = "custom"
-            actual_model = (custom_model or "").strip()
-            try:
-                api_client.switch_model(
-                    provider="custom",
-                    model_name=actual_model,
-                    base_url=(custom_base_url or "").strip(),
-                    api_key=(custom_api_key or "").strip(),
-                )
-                return True, "", actual_provider, actual_model, api_client
-            except Exception as e:
-                return False, f"自定义模型配置失败: {str(e)}", actual_provider, actual_model, None
-
         try:
-            provider_id = normalize_provider(provider)
-        except ValueError as e:
-            return False, str(e), provider or "", model or "", None
-
-        if provider_requires_api_key(provider_id):
-            conf = PROVIDERS[provider_id]
-            api_key = os.getenv(conf["api_key_env"], "").strip()
-            if not api_key:
-                return (
-                    False,
-                    f"{conf['label']} 未配置 API Key，请设置 {conf['api_key_env']}，"
-                    "或启用自定义 OpenAI 兼容接口。",
-                    provider_id,
-                    model or "",
-                    None,
-                )
-
-        try:
-            api_client.switch_model(provider=provider_id, model_name=(model or None))
-            return True, "", provider_id, api_client.model_name, api_client
+            runtime_config = resolve_runtime_model_config(
+                provider=provider,
+                model=model,
+                use_custom_api=use_custom_api,
+                custom_base_url=custom_base_url,
+                custom_api_key=custom_api_key,
+                custom_model=custom_model,
+            )
+            api_client.switch_model(
+                provider=runtime_config.provider,
+                model_name=runtime_config.model,
+                base_url=runtime_config.base_url if runtime_config.is_custom else None,
+                api_key=runtime_config.api_key if runtime_config.is_custom else None,
+            )
+            return True, "", runtime_config.provider, runtime_config.model, api_client
+        except ModelConfigError as e:
+            return False, e.message, provider or "", model or "", None
         except Exception as e:
-            return False, f"模型切换失败: {str(e)}", provider_id, model or "", None
+            return False, f"模型切换失败: {str(e)}", provider or "", model or "", None
 
     def process_query(
         self,
@@ -944,7 +932,7 @@ class VLMChatAssistant:
 
     def register_react_api_routes(self, api_app):
         """为 React 前端注册 JSON API，复用现有 Gradio 业务编排逻辑。"""
-        from fastapi import File, Form, HTTPException, UploadFile
+        from fastapi import Body, File, Form, HTTPException, UploadFile
 
         def session_payload(session: dict) -> dict:
             return {
@@ -988,6 +976,16 @@ class VLMChatAssistant:
                 raise HTTPException(status_code=404, detail="会话不存在")
             return session_id
 
+        def resolve_model_config_payload(payload: dict):
+            return resolve_runtime_model_config(
+                provider=payload.get("provider"),
+                model=payload.get("model"),
+                use_custom_api=bool(payload.get("useCustomApi") or payload.get("use_custom_api")),
+                custom_base_url=payload.get("customBaseUrl") or payload.get("custom_base_url") or "",
+                custom_api_key=payload.get("customApiKey") or payload.get("custom_api_key") or "",
+                custom_model=payload.get("customModel") or payload.get("custom_model") or "",
+            )
+
         @api_app.get("/api/config")
         def api_config():
             return {
@@ -996,6 +994,8 @@ class VLMChatAssistant:
                         "id": key,
                         "label": conf["label"],
                         "models": conf.get("models", []),
+                        "requiresApiKey": key != "ollama",
+                        "baseUrl": conf["base_url"],
                     }
                     for key, conf in PROVIDERS.items()
                 ],
@@ -1005,6 +1005,47 @@ class VLMChatAssistant:
                 "enableRag": ENABLE_RAG,
                 "maxImagesPerMessage": MAX_IMAGES_PER_MESSAGE,
             }
+
+        @api_app.get("/api/model-config")
+        def api_model_config():
+            try:
+                default_runtime = resolve_runtime_model_config(provider=DEFAULT_PROVIDER)
+                default_summary = default_runtime.safe_summary()
+                validation = {"ok": True, "errorCode": "", "message": "默认模型配置可用"}
+            except ModelConfigError as e:
+                default_summary = None
+                validation = {"ok": False, "errorCode": e.code, "message": e.message}
+            return {
+                "providers": [
+                    {
+                        "id": key,
+                        "label": conf["label"],
+                        "models": conf.get("models", []),
+                        "requiresApiKey": key != "ollama",
+                        "baseUrl": conf["base_url"],
+                    }
+                    for key, conf in PROVIDERS.items()
+                ],
+                "defaultProvider": DEFAULT_PROVIDER,
+                "defaultSummary": default_summary,
+                "validation": validation,
+            }
+
+        @api_app.post("/api/model-config/validate")
+        def api_validate_model_config(payload: dict = Body(default_factory=dict)):
+            try:
+                runtime_config = resolve_model_config_payload(payload)
+                return {"ok": True, "errorCode": "", "message": "配置校验通过", "summary": runtime_config.safe_summary()}
+            except ModelConfigError as e:
+                return {"ok": False, "errorCode": e.code, "message": e.message, "summary": None}
+
+        @api_app.post("/api/model-config/test")
+        def api_test_model_config(payload: dict = Body(default_factory=dict)):
+            try:
+                runtime_config = resolve_model_config_payload(payload)
+            except ModelConfigError as e:
+                return {"ok": False, "errorCode": e.code, "message": e.message, "summary": None}
+            return test_runtime_model_config(runtime_config)
 
         @api_app.get("/api/sessions")
         def api_list_sessions():
