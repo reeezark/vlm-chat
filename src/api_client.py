@@ -25,6 +25,19 @@ from .logger import get_api_logger
 logger = get_api_logger()
 
 
+def normalize_provider(provider: Optional[str]) -> str:
+    """规范化并校验内置 Provider 标识。"""
+    provider_id = (provider or DEFAULT_PROVIDER or "dashscope").strip().lower()
+    if provider_id not in PROVIDERS:
+        raise ValueError(f"不支持的模型提供方: {provider_id}")
+    return provider_id
+
+
+def provider_requires_api_key(provider: Optional[str]) -> bool:
+    """判断内置 Provider 是否必须配置 API Key。"""
+    return normalize_provider(provider) != "ollama"
+
+
 def resolve_provider(provider: Optional[str]) -> tuple[str, str, str]:
     """
     解析 Provider 配置，返回 (base_url, api_key, default_model)。
@@ -32,13 +45,16 @@ def resolve_provider(provider: Optional[str]) -> tuple[str, str, str]:
     参数:
         provider: Provider 标识（PROVIDERS 的 key）；为空时使用默认 Provider
     """
-    provider = provider or DEFAULT_PROVIDER
+    provider = normalize_provider(provider)
     conf = PROVIDERS.get(provider)
-    if not conf:
-        # 回退到兼容旧逻辑的 DashScope 默认
-        return BASE_URL, DASHSCOPE_API_KEY, MODEL_NAME
     api_key = os.getenv(conf["api_key_env"], "")
-    default_model = conf["models"][0] if conf.get("models") else MODEL_NAME
+    provider_model = os.getenv(f"{provider.upper()}_MODEL_NAME", "").strip()
+    if provider_model:
+        default_model = provider_model
+    elif provider == DEFAULT_PROVIDER and MODEL_NAME:
+        default_model = MODEL_NAME
+    else:
+        default_model = conf["models"][0] if conf.get("models") else MODEL_NAME
     return conf["base_url"], api_key, default_model
 
 
@@ -60,16 +76,20 @@ class VLMAPIClient:
             model_name: 模型名称，如果为None则使用 Provider 默认模型
             provider: Provider 标识（dashscope/openai/openrouter/ollama）
         """
-        self.provider: str = provider or DEFAULT_PROVIDER
+        self.provider: str = normalize_provider(provider)
         base_url, resolved_key, default_model = resolve_provider(self.provider)
 
-        # 兼容旧用法：未指定 provider 且未指定 key 时，回退到 DASHSCOPE_API_KEY
-        self.api_key: str = api_key or resolved_key or DASHSCOPE_API_KEY
+        if api_key is not None:
+            self.api_key = api_key
+        elif self.provider == "dashscope":
+            self.api_key = resolved_key or DASHSCOPE_API_KEY
+        else:
+            self.api_key = resolved_key
         self.model_name: str = model_name or default_model
         self.base_url: str = base_url
         self._image_cache: OrderedDict[tuple[str, float, int], str] = OrderedDict()
 
-        if not self.api_key and self.provider != "ollama" and not allow_missing_key:
+        if not self.api_key and provider_requires_api_key(self.provider) and not allow_missing_key:
             logger.error("API密钥未设置")
             raise ValueError("API密钥未设置！请设置对应 Provider 的环境变量或在初始化时提供api_key参数")
 
@@ -99,9 +119,15 @@ class VLMAPIClient:
             self.api_key = api_key
             self.model_name = model_name
             self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
-        elif provider and provider != self.provider:
-            self.provider = provider
-            base_url, resolved_key, default_model = resolve_provider(provider)
+        elif provider:
+            provider_id = normalize_provider(provider)
+            if provider_id == self.provider:
+                if model_name:
+                    self.model_name = model_name
+                logger.info(f"切换模型: provider={self.provider}, model={self.model_name}")
+                return
+            self.provider = provider_id
+            base_url, resolved_key, default_model = resolve_provider(provider_id)
             self.base_url = base_url
             self.api_key = resolved_key
             self.model_name = model_name or default_model

@@ -34,6 +34,37 @@ def test_rag_ingest_text_splits_and_searches(tmp_path):
     assert all(r["filename"] == "manual.pdf" for r in results)
 
 
+def test_rag_ingest_text_sanitizes_invalid_unicode_surrogates(tmp_path):
+    db_path = tmp_path / "rag.db"
+    rag = RagManager(str(db_path))
+    text = "这是一份包含异常字符的知识库文档\ud83d，描述部署和健康检查。"
+
+    document_id, chunk_count = rag.ingest_text("默认知识库", "broken.pdf", text, "application/pdf")
+    results = rag.semantic_search("部署健康检查", limit=3)
+
+    assert document_id
+    assert chunk_count == 1
+    assert results
+    assert results[0]["filename"] == "broken.pdf"
+
+
+def test_rag_cleanup_empty_documents_removes_unsearchable_records(tmp_path):
+    db_path = tmp_path / "rag.db"
+    rag = RagManager(str(db_path))
+    collection_id = rag.create_collection("默认知识库")
+    empty_doc = rag.add_document(collection_id, "empty.pdf", owner_user_id="user-a")
+    valid_doc = rag.add_document(collection_id, "valid.pdf", owner_user_id="user-a")
+    rag.add_chunk(valid_doc, 0, "可检索内容")
+
+    removed = rag.cleanup_empty_documents(owner_user_id="user-a")
+
+    assert removed == 1
+    assert rag.list_chunks(empty_doc, owner_user_id="user-a") == []
+    docs = rag.list_documents("默认知识库", owner_user_id="user-a")
+    assert len(docs) == 1
+    assert docs[0]["filename"] == "valid.pdf"
+
+
 def test_rag_semantic_search_returns_scored_results(tmp_path):
     db_path = tmp_path / "rag.db"
     rag = RagManager(str(db_path))

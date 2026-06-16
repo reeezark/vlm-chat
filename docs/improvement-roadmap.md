@@ -480,6 +480,10 @@ src/
 | 用户资源归属 MVP | 5 / 10 | 会话表和 RAG 文档表增加用户归属字段，应用以默认用户上下文过滤会话和知识库操作 | 单测覆盖会话按用户过滤、跨用户删除失败、RAG 文档按 owner 过滤 |
 | 前端自定义模型 API | 2 / 8 | 侧边栏新增自定义 OpenAI 兼容 API 配置，用户可填写 Base URL、API Key 和模型名并优先使用 | 单测覆盖自定义配置切换，应用可在无默认 Key 时启动 |
 | 自定义模型会话隔离 | 2 / 6 / 10 | 自定义模型客户端改为按浏览器会话创建和复用，避免不同会话的 API 地址、API Key、模型名互相覆盖 | 单测覆盖不同 session 使用不同自定义模型配置 |
+| React 前端重构 MVP | 3 / 5 / 9 | 新增 React + Vite + TypeScript 前端，按 API、组件、状态、类型和样式拆分，并通过 FastAPI `/api/*` 复用现有业务链路 | `npm run build` 通过，后端测试通过，React 静态入口和 Gradio 兼容入口 smoke 通过 |
+| RAG 入库健壮性修复 | 8 | 修复 PDF 抽取文本包含非法 Unicode 代理字符时 embedding/SQLite 写入失败的问题，并清理 0 切片脏文档 | 单测覆盖异常 Unicode 入库和空文档清理，当前本地脏数据已清理 |
+| OpenAI 兼容环境变量配置修复 | 2 | 修复 `.env` 中 OpenAI 兼容 URL/API Key/模型名未被默认调用链正确选用的问题，并补充 `.env.example` | 解析结果确认走 `openai` Provider，质量门禁通过 |
+| 前端本地配置保存 | 3 | React 前端支持将自定义 API 地址和 API Key 保存到 `localStorage`，并在再次访问时自动回填 | 前端构建通过，质量门禁通过 |
 
 ### 16.2 部分完成
 
@@ -499,7 +503,7 @@ src/
 | 多实例部署 | 需要 Postgres、对象存储、Redis 限流和状态外置 | 先抽象 Repository，再替换存储后端 |
 | OAuth / SSO / RBAC | 需要完整用户认证授权链路 | 在用户模型稳定后单独实现 |
 | 文件安全扫描 | 需要 MIME sniffing、AV 扫描或沙箱解析 | 与上传服务拆分一起推进 |
-| 前后端分离 | 当前仍基于 Gradio 单体 | 产品稳定后评估迁移 Next.js / Vue |
+| 前后端分离 | 已完成 React + FastAPI API MVP，并保留 Gradio 兼容入口；尚未完全移除 Gradio 旧 UI | 后续继续扩展 React 路由、流式响应、消息编辑、知识库细粒度管理 |
 
 ### 16.4 本次变更说明
 
@@ -511,3 +515,7 @@ src/
 - 用户归属当前基于 `DEFAULT_USER_ID` / `DEFAULT_USERNAME` 默认用户上下文，目的是先建立数据模型与过滤边界；真实多用户仍需接入登录态、Session/JWT 和 RBAC。
 - 前端自定义模型 API 的 API Key 仅进入运行时 `VLMAPIClient`，不写入 SQLite 和审计日志；生产环境仍建议结合登录鉴权和用户级密钥管理。
 - 自定义模型 API 已从全局客户端切换为会话级客户端池，浏览器会话删除时同步清理对应运行时客户端和限流桶。
+- React 前端采用渐进式迁移策略：`FRONTEND_MODE=react` 时根路径提供 React 应用，Gradio 保留在 `/gradio`；默认仍可用 Gradio 模式以便回滚。
+- RAG 入库现在会清洗 PDF 抽取文本中的非法 Unicode 字符，并以事务方式写入文档和切片，避免出现“文档已入库但无切片可检索”的状态。
+- OpenAI 兼容 Provider 现在支持通过 `MODEL_NAME`、`OPENAI_MODEL_NAME` 或 `OPENAI_MODELS` 配置默认模型和前端模型列表；`.env` 已切换为 `DEFAULT_PROVIDER=openai`。
+- React 前端的自定义 API 地址和 API Key 可保存到浏览器 `localStorage`，便于个人设备重复访问时自动回填；该 Key 为浏览器本地明文存储。

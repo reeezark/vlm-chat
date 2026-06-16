@@ -80,6 +80,11 @@ class RagManager:
         if column not in columns:
             conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
+    @staticmethod
+    def _sanitize_text(text: str) -> str:
+        """清理 PDF 提取中可能出现的非法 Unicode 代理字符，避免 embedding/SQLite 编码失败。"""
+        return (text or "").encode("utf-8", errors="replace").decode("utf-8", errors="replace").strip()
+
     def get_or_create_collection(self, name: str, description: str = "") -> str:
         with self._connect() as conn:
             row = conn.execute(
@@ -118,6 +123,7 @@ class RagManager:
 
     def add_chunk(self, document_id: str, chunk_index: int, content: str, metadata: str = "{}") -> str:
         chunk_id = uuid.uuid4().hex
+        content = self._sanitize_text(content)
         embedding = json.dumps(self.embedding_provider.embed(content), separators=(",", ":"))
         with self._connect() as conn:
             conn.execute(
@@ -136,14 +142,32 @@ class RagManager:
         owner_user_id: str | None = None,
     ) -> tuple[str, int]:
         """将文档文本切片并写入默认知识库，返回 document_id 和切片数量。"""
-        cleaned = (text or "").strip()
+        cleaned = self._sanitize_text(text)
         if not cleaned:
             return "", 0
-        collection_id = self.get_or_create_collection(collection_name)
-        document_id = self.add_document(collection_id, filename, content_type, owner_user_id=owner_user_id)
         chunks = self.split_text(cleaned)
+        if not chunks:
+            return "", 0
+        collection_id = self.get_or_create_collection(collection_name)
+        document_id = uuid.uuid4().hex
+        now = time.time()
+        chunk_rows = []
         for idx, chunk in enumerate(chunks):
-            self.add_chunk(document_id, idx, chunk)
+            sanitized_chunk = self._sanitize_text(chunk)
+            embedding = json.dumps(self.embedding_provider.embed(sanitized_chunk), separators=(",", ":"))
+            chunk_rows.append((uuid.uuid4().hex, document_id, idx, sanitized_chunk, embedding, "{}", now))
+        with self._connect() as conn:
+            conn.execute(
+                """INSERT INTO rag_documents
+                   (document_id, collection_id, filename, content_type, status, owner_user_id, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (document_id, collection_id, filename, content_type, "indexed", owner_user_id, now),
+            )
+            conn.executemany(
+                """INSERT INTO rag_chunks (chunk_id, document_id, chunk_index, content, embedding, metadata, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                chunk_rows,
+            )
         return document_id, len(chunks)
 
     @staticmethod
@@ -302,6 +326,24 @@ class RagManager:
             document_ids = [r["document_id"] for r in rows]
             for document_id in document_ids:
                 conn.execute("DELETE FROM rag_chunks WHERE document_id = ?", (document_id,))
+                conn.execute("DELETE FROM rag_documents WHERE document_id = ?", (document_id,))
+        return len(document_ids)
+
+    def cleanup_empty_documents(self, owner_user_id: str | None = None) -> int:
+        """清理历史异常中遗留的无切片文档，避免 UI 展示不可检索的知识库条目。"""
+        owner_clause = "AND d.owner_user_id = ?" if owner_user_id else ""
+        params = (owner_user_id,) if owner_user_id else ()
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT d.document_id
+                   FROM rag_documents d
+                   LEFT JOIN rag_chunks c ON c.document_id = d.document_id
+                   WHERE c.chunk_id IS NULL
+                   {owner_clause}""",
+                params,
+            ).fetchall()
+            document_ids = [row["document_id"] for row in rows]
+            for document_id in document_ids:
                 conn.execute("DELETE FROM rag_documents WHERE document_id = ?", (document_id,))
         return len(document_ids)
 

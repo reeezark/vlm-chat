@@ -7,6 +7,8 @@ import os
 import sys
 import logging
 import time
+import shutil
+from typing import Optional
 
 os.environ["OPENAI_LOG"] = "error"
 os.environ["GRADIO_ANALYTICS_ENABLED"] = "False"
@@ -16,7 +18,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import gradio as gr
 
-from src.api_client import VLMAPIClient
+from src.api_client import VLMAPIClient, normalize_provider, provider_requires_api_key
 from src.chat_manager import ChatManager
 from src.image_processor import ImageProcessor
 from src.metrics import MetricsCollector
@@ -329,6 +331,16 @@ class VLMChatAssistant:
         # 启动时清理过期会话；每个浏览器会话在 init_browser_session 中独立创建
         self.chat_manager.cleanup_expired_sessions()
         self.image_processor.cleanup_old_uploads()
+        if self.rag_manager:
+            removed = self.rag_manager.cleanup_empty_documents(owner_user_id=self.user_id)
+            if removed:
+                self.chat_manager.add_audit_log(
+                    action="rag_cleanup_empty_documents",
+                    resource_type="rag_document",
+                    user_id=self.user_id,
+                    success=True,
+                    detail=f"documents={removed}",
+                )
 
     def _record_tool_audit(self, name: str, success: bool, detail: str) -> None:
         """记录工具调用指标和审计；工具层不持有会话上下文，因此 session_id 为空。"""
@@ -530,7 +542,7 @@ class VLMChatAssistant:
         custom_base_url: str,
         custom_api_key: str,
         custom_model: str,
-    ) -> tuple[bool, str, str, str, VLMAPIClient | None]:
+    ) -> tuple[bool, str, str, str, Optional[VLMAPIClient]]:
         """应用模型配置到当前会话客户端，返回 (成功, 错误消息, 实际 provider, 实际 model, client)。"""
         api_client = self._api_client_for_session(session_id)
         if use_custom_api:
@@ -548,10 +560,28 @@ class VLMChatAssistant:
                 return False, f"自定义模型配置失败: {str(e)}", actual_provider, actual_model, None
 
         try:
-            api_client.switch_model(provider=provider, model_name=model)
-            return True, "", provider, model, api_client
+            provider_id = normalize_provider(provider)
+        except ValueError as e:
+            return False, str(e), provider or "", model or "", None
+
+        if provider_requires_api_key(provider_id):
+            conf = PROVIDERS[provider_id]
+            api_key = os.getenv(conf["api_key_env"], "").strip()
+            if not api_key:
+                return (
+                    False,
+                    f"{conf['label']} 未配置 API Key，请设置 {conf['api_key_env']}，"
+                    "或启用自定义 OpenAI 兼容接口。",
+                    provider_id,
+                    model or "",
+                    None,
+                )
+
+        try:
+            api_client.switch_model(provider=provider_id, model_name=(model or None))
+            return True, "", provider_id, api_client.model_name, api_client
         except Exception as e:
-            return False, f"模型切换失败: {str(e)}", provider, model, None
+            return False, f"模型切换失败: {str(e)}", provider_id, model or "", None
 
     def process_query(
         self,
@@ -697,7 +727,6 @@ class VLMChatAssistant:
         # 应用 Provider / 模型 / System Prompt 设置
         actual_provider = "custom" if use_custom_api else provider
         actual_model = (custom_model or "").strip() if use_custom_api else model
-        self.chat_manager.set_model(session_id, actual_provider, actual_model)
         if system_prompt is not None:
             self.chat_manager.set_system_prompt(session_id, system_prompt)
         ok, err_msg, actual_provider, actual_model, api_client = self._apply_model_config(
@@ -714,6 +743,7 @@ class VLMChatAssistant:
             chatbot_history.append({"role": "assistant", "content": err_msg})
             yield chatbot_history, None, session_id
             return
+        self.chat_manager.set_model(session_id, actual_provider, actual_model)
 
         # 仅当本条没有图片时才复用会话历史图片（避免文档/纯文本提问误带旧图）
         use_image = current_image
@@ -817,12 +847,9 @@ class VLMChatAssistant:
         if chatbot_history and chatbot_history[-1]["role"] == "user":
             chatbot_history.pop()
 
-        actual_provider = "custom" if use_custom_api else provider
-        actual_model = (custom_model or "").strip() if use_custom_api else model
-        self.chat_manager.set_model(session_id, actual_provider, actual_model)
         if system_prompt is not None:
             self.chat_manager.set_system_prompt(session_id, system_prompt)
-        ok, err_msg, _, _, api_client = self._apply_model_config(
+        ok, err_msg, actual_provider, actual_model, api_client = self._apply_model_config(
             session_id,
             provider,
             model,
@@ -835,6 +862,7 @@ class VLMChatAssistant:
             chatbot_history.append({"role": "assistant", "content": err_msg})
             yield chatbot_history, session_id
             return
+        self.chat_manager.set_model(session_id, actual_provider, actual_model)
 
         history = self.chat_manager.get_history(session_id, format_for_api=True)
         sys_prompt = system_prompt or self.chat_manager.get_system_prompt(session_id)
@@ -913,6 +941,160 @@ class VLMChatAssistant:
         session_id = self._ensure_session(session_id)
         self.chat_manager.clear_history(session_id)
         return [], None, session_id
+
+    def register_react_api_routes(self, api_app):
+        """为 React 前端注册 JSON API，复用现有 Gradio 业务编排逻辑。"""
+        from fastapi import File, Form, HTTPException, UploadFile
+
+        def session_payload(session: dict) -> dict:
+            return {
+                "id": session["session_id"],
+                "name": session.get("name") or "未命名",
+                "messageCount": session.get("message_count", 0),
+                "createdAt": session.get("created_at"),
+                "lastActive": session.get("last_active"),
+            }
+
+        def message_payload(message: dict) -> dict:
+            if message.get("role") == "user":
+                image = message.get("image")
+                images = image if isinstance(image, list) else ([image] if image else [])
+                return {
+                    "role": "user",
+                    "content": message.get("text") or "",
+                    "images": [os.path.basename(p) for p in images],
+                    "timestamp": message.get("timestamp"),
+                }
+            return {
+                "role": "assistant",
+                "content": message.get("content") or "",
+                "images": [],
+                "timestamp": message.get("timestamp"),
+            }
+
+        def save_upload(file: UploadFile) -> str:
+            suffix = os.path.splitext(file.filename or "")[1]
+            os.makedirs("data/temp_images", exist_ok=True)
+            tmp_path = os.path.join("data/temp_images", f"react_upload_{time.time_ns()}{suffix}")
+            try:
+                with open(tmp_path, "wb") as target:
+                    shutil.copyfileobj(file.file, target)
+            finally:
+                file.file.close()
+            return tmp_path
+
+        def require_session(session_id: str) -> str:
+            if not session_id or not self.chat_manager.get_session(session_id, user_id=self.user_id):
+                raise HTTPException(status_code=404, detail="会话不存在")
+            return session_id
+
+        @api_app.get("/api/config")
+        def api_config():
+            return {
+                "providers": [
+                    {
+                        "id": key,
+                        "label": conf["label"],
+                        "models": conf.get("models", []),
+                    }
+                    for key, conf in PROVIDERS.items()
+                ],
+                "defaultProvider": DEFAULT_PROVIDER,
+                "defaultSystemPrompt": DEFAULT_SYSTEM_PROMPT,
+                "enableTools": ENABLE_TOOLS,
+                "enableRag": ENABLE_RAG,
+                "maxImagesPerMessage": MAX_IMAGES_PER_MESSAGE,
+            }
+
+        @api_app.get("/api/sessions")
+        def api_list_sessions():
+            return {
+                "sessions": [
+                    session_payload(session)
+                    for session in self.chat_manager.get_all_sessions(user_id=self.user_id)
+                ]
+            }
+
+        @api_app.post("/api/sessions")
+        def api_create_session():
+            session_id = self.chat_manager.create_session(user_id=self.user_id)
+            session = self.chat_manager.get_session(session_id, user_id=self.user_id)
+            return {"session": session_payload({**session, "message_count": 0})}
+
+        @api_app.get("/api/sessions/{session_id}/messages")
+        def api_get_messages(session_id: str):
+            session_id = require_session(session_id)
+            session = self.chat_manager.get_session(session_id, user_id=self.user_id)
+            return {
+                "session": {
+                    "id": session_id,
+                    "name": session.get("name"),
+                    "systemPrompt": session.get("system_prompt"),
+                    "provider": session.get("provider"),
+                    "model": session.get("model"),
+                },
+                "messages": [message_payload(message) for message in session.get("history", [])],
+            }
+
+        @api_app.delete("/api/sessions/{session_id}")
+        def api_delete_session(session_id: str):
+            ok = self.chat_manager.delete_session(session_id, user_id=self.user_id)
+            self._session_api_clients.pop(session_id, None)
+            self._rate_buckets.pop(session_id, None)
+            if not ok:
+                raise HTTPException(status_code=404, detail="会话不存在")
+            return {"ok": True}
+
+        @api_app.post("/api/chat")
+        async def api_chat(
+            session_id: str = Form(default=""),
+            message: str = Form(default=""),
+            provider: str = Form(default=DEFAULT_PROVIDER),
+            model: str = Form(default=""),
+            system_prompt: str = Form(default=DEFAULT_SYSTEM_PROMPT),
+            use_tools: bool = Form(default=False),
+            use_custom_api: bool = Form(default=False),
+            custom_base_url: str = Form(default=""),
+            custom_api_key: str = Form(default=""),
+            custom_model: str = Form(default=""),
+            files: Optional[list[UploadFile]] = File(default=None),
+        ):
+            session_id = require_session(session_id) if session_id else self._ensure_session(session_id)
+            saved_files = [save_upload(file) for file in (files or []) if file.filename]
+            multimodal_input = {"text": message, "files": saved_files}
+            chatbot_history = self.chat_manager.format_for_chatbot(session_id)
+            final_output = None
+            for output in self.process_query(
+                multimodal_input,
+                chatbot_history,
+                session_id,
+                provider,
+                model,
+                system_prompt,
+                use_tools,
+                use_custom_api,
+                custom_base_url,
+                custom_api_key,
+                custom_model,
+            ):
+                final_output = output
+
+            if final_output is None:
+                raise HTTPException(status_code=400, detail="消息为空或处理失败")
+
+            latest_session = self.chat_manager.get_session(session_id, user_id=self.user_id)
+            messages = latest_session.get("history", []) if latest_session else []
+            return {
+                "sessionId": session_id,
+                "messages": [message_payload(item) for item in messages],
+            }
+
+        @api_app.get("/api/knowledge-base")
+        def api_knowledge_base():
+            return {
+                "summary": self._rag_summary(),
+                "documents": self._rag_documents(),
+            }
 
     @staticmethod
     def update_model_choices(provider):
@@ -1184,9 +1366,14 @@ class VLMChatAssistant:
             return
 
         from fastapi import FastAPI, Response
+        from fastapi.responses import FileResponse
+        from fastapi.staticfiles import StaticFiles
         import uvicorn
 
         api_app = FastAPI(title="VLM Chat Assistant")
+        self.register_react_api_routes(api_app)
+        if os.path.isdir("data/uploads"):
+            api_app.mount("/uploads", StaticFiles(directory="data/uploads"), name="uploads")
 
         @api_app.get("/health")
         def health():
@@ -1204,14 +1391,32 @@ class VLMChatAssistant:
                 media_type="text/plain; version=0.0.4",
             )
 
+        frontend_dist = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "dist")
+        frontend_mode = os.getenv("FRONTEND_MODE", "gradio").lower()
+        gradio_path = "/gradio" if frontend_mode == "react" and os.path.isdir(frontend_dist) else "/"
+
+        if frontend_mode == "react" and os.path.isdir(frontend_dist):
+            assets_dir = os.path.join(frontend_dist, "assets")
+            if os.path.isdir(assets_dir):
+                api_app.mount("/assets", StaticFiles(directory=assets_dir), name="frontend-assets")
+            print("[INFO] React 前端已启用，Gradio 兼容入口: /gradio")
+
         mounted_app = gr.mount_gradio_app(
             api_app,
             demo,
-            path="/",
+            path=gradio_path,
             server_name=GRADIO_SERVER_NAME,
             server_port=GRADIO_SERVER_PORT,
             auth=auth,
         )
+        if frontend_mode == "react" and os.path.isdir(frontend_dist):
+            @mounted_app.get("/{full_path:path}")
+            def react_app(full_path: str):
+                candidate = os.path.join(frontend_dist, full_path)
+                if full_path and os.path.isfile(candidate):
+                    return FileResponse(candidate)
+                return FileResponse(os.path.join(frontend_dist, "index.html"))
+
         uvicorn.run(mounted_app, host=GRADIO_SERVER_NAME, port=GRADIO_SERVER_PORT)
 
 

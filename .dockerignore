@@ -18,6 +18,8 @@ env/
 .coverage
 htmlcov/
 tests/
+frontend/node_modules/
+frontend/dist/
 
 # 运行时数据（用 volume 挂载，无需打进镜像）
 data/

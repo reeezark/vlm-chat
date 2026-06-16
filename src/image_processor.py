@@ -33,6 +33,11 @@ class ImageProcessor:
         os.makedirs(self.upload_dir, exist_ok=True)
         logger.info(f"图片处理器初始化完成，临时目录: {self.temp_dir}，上传目录: {self.upload_dir}")
 
+    @staticmethod
+    def sanitize_extracted_text(text: str) -> str:
+        """清理 PDF 文本抽取中可能出现的非法 Unicode 代理字符。"""
+        return (text or "").encode("utf-8", errors="replace").decode("utf-8", errors="replace").strip()
+
     def validate_format(self, image_path: str) -> tuple[bool, str]:
         """
         验证图片格式
@@ -326,7 +331,7 @@ class ImageProcessor:
                 page_text = page.extract_text() or ""
                 if page_text.strip():
                     parts.append(page_text.strip())
-            text = "\n\n".join(parts).strip()
+            text = self.sanitize_extracted_text("\n\n".join(parts))
         except Exception as e:
             logger.error(f"PDF 解析失败: {pdf_path} ({e})")
             return False, f"PDF 解析失败: {e}"
