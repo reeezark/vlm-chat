@@ -1,0 +1,18 @@
+% !TeX root = ../main.tex
+
+\sysusetup{
+  keywords  = {视觉语言模型，多模态问答，智能助手，VLM评测，TextVQA},
+  keywords* = {Vision-Language Model, Multimodal QA, Intelligent Assistant, VLM Evaluation, TextVQA},
+}
+
+\begin{abstract}
+  随着视觉语言模型（Vision-Language Model, VLM）的快速发展，多模态图文理解技术日趋成熟。本项目设计并实现了一个基于VLM的智能图文问答助手——vlm-chat，支持用户上传图片和文档并进行中文多轮问答交互。系统以阿里云DashScope API提供的Qwen3-VL-Flash模型为核心推理引擎，实现了流式输出、多Provider热切换、RAG知识库检索、DuckDuckGo联网工具调用等工程特性，并构建了Gradio + React TypeScript双前端交互界面。
+
+  为全面评估系统能力，本项目构建了包含80条中文数据的自建评测集（覆盖自然场景与文档图像两大类、五子类别），并在TextVQA 0.5.1公开数据集上进行了验证。修复评测算法中的虚高问题后，自建集准确率为55.0\%，公开集（TextVQA）准确率为86.1\%。通过5个成功案例和5个失败案例的深度分析，揭示了模型在物体识别召回偏差、否定回答场景、中文OCR细粒度等方面的典型能力边界。基于实验结果，从AGI视角讨论了多模态理解的当前局限与未来方向，提出了Sentence-BERT语义检索、LoRA微调和视频问答扩展三条改进路径。
+\end{abstract}
+
+\begin{abstract*}
+  With the rapid development of Vision-Language Models (VLMs), multimodal image-text understanding technology has become increasingly mature. This project designs and implements vlm-chat, an intelligent image-text QA assistant based on VLM, supporting image and document upload for Chinese multi-turn QA interactions. The system uses the Qwen3-VL-Flash model provided by Alibaba Cloud DashScope API as the core inference engine, implementing engineering features including streaming output, multi-provider hot-swap, RAG knowledge base retrieval, and DuckDuckGo web search tool calling, with Gradio and React TypeScript dual frontend interfaces.
+
+  To comprehensively evaluate system capabilities, we constructed a self-built evaluation dataset of 80 Chinese items covering natural scenes and document images across five subcategories, and validated on the TextVQA 0.5.1 public benchmark. After fixing inflation issues in the evaluation algorithm, the self-built dataset achieves 55.0\% accuracy while the public dataset (TextVQA) achieves 86.1\%. Through in-depth analysis of five success and five failure cases, we reveal typical capability boundaries in object recognition recall bias, negation scenarios, and fine-grained Chinese OCR. Based on experimental results, we discuss current limitations and future directions of multimodal understanding from an AGI perspective, proposing three improvement paths: Sentence-BERT semantic retrieval, LoRA fine-tuning, and video QA extension.
+\end{abstract*}
