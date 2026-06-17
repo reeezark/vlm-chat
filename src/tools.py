@@ -6,8 +6,6 @@
 import json
 from typing import Callable, Optional
 
-import requests
-
 from .config import (
     WEB_SEARCH_MAX_RESULTS, WEB_SEARCH_TIMEOUT,
     WEB_SEARCH_MAX_QUERY_CHARS, WEB_SEARCH_MAX_RESULT_CHARS,
@@ -58,7 +56,7 @@ TOOLS_SPEC: list[dict] = [
 
 def web_search(query: str, max_results: Optional[int] = None) -> str:
     """
-    使用 DuckDuckGo 即时应答 API 进行联网搜索（无需密钥）。
+    使用 duckduckgo-search 库进行联网搜索（无需密钥，返回真实搜索结果）。
 
     参数:
         query: 搜索关键词
@@ -67,39 +65,33 @@ def web_search(query: str, max_results: Optional[int] = None) -> str:
     返回:
         搜索结果的文本摘要；失败时返回错误说明
     """
+    try:
+        from ddgs import DDGS
+    except ImportError:
+        return "联网搜索失败: 请先安装 ddgs 包（pip install ddgs）"
+
     max_results = max_results or WEB_SEARCH_MAX_RESULTS
     query = (query or "").strip()
     if not query:
         return "联网搜索失败: 搜索关键词不能为空"
     if len(query) > WEB_SEARCH_MAX_QUERY_CHARS:
         query = query[:WEB_SEARCH_MAX_QUERY_CHARS]
+
     try:
-        resp = requests.get(
-            "https://api.duckduckgo.com/",
-            params={"q": query, "format": "json", "no_html": 1, "skip_disambig": 1},
-            timeout=WEB_SEARCH_TIMEOUT,
-        )
-        resp.raise_for_status()
-        data = resp.json()
+        results: list[str] = []
+        with DDGS() as ddgs:
+            for r in ddgs.text(query, max_results=max_results):
+                title = r.get("title", "")
+                body  = r.get("body", "")
+                if title or body:
+                    results.append(f"【{title}】{body}")
     except Exception as e:
         logger.warning(f"联网搜索失败: {e}")
         return f"联网搜索失败: {e}"
 
-    results: list[str] = []
-    abstract = data.get("AbstractText") or data.get("Answer")
-    if abstract:
-        results.append(abstract)
-
-    for topic in data.get("RelatedTopics", []):
-        if len(results) >= max_results:
-            break
-        text = topic.get("Text") if isinstance(topic, dict) else None
-        if text:
-            results.append(text)
-
     if not results:
-        return f"未找到关于“{query}”的搜索结果。"
-    text = "\n".join(f"- {r}" for r in results[:max_results])
+        return f"未找到关于\"{query}\"的搜索结果。"
+    text = "\n".join(f"- {r}" for r in results)
     if len(text) > WEB_SEARCH_MAX_RESULT_CHARS:
         text = text[:WEB_SEARCH_MAX_RESULT_CHARS] + "\n…（搜索结果过长，已截断）"
     return text

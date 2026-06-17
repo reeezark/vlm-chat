@@ -275,6 +275,7 @@ class VLMAPIClient:
         if use_tools and ENABLE_TOOLS:
             kwargs["tools"] = TOOLS_SPEC
             kwargs["tool_choice"] = "auto"
+        kwargs["extra_body"] = {"enable_thinking": False}
         return kwargs
 
     def call_api(
@@ -314,8 +315,14 @@ class VLMAPIClient:
                 # 处理工具调用（P0-4）
                 tool_calls = getattr(message, "tool_calls", None)
                 if isinstance(tool_calls, (list, tuple)) and tool_calls:
-                    messages.append(message.model_dump() if hasattr(message, "model_dump") else {
-                        "role": "assistant", "content": message.content, "tool_calls": tool_calls,
+                    messages.append({
+                        "role": "assistant",
+                        "content": message.content,
+                        "tool_calls": [
+                            {"id": tc.id, "type": "function",
+                             "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
+                            for tc in tool_calls
+                        ],
                     })
                     for tc in tool_calls:
                         result = execute_tool_call(tc.function.name, tc.function.arguments)
@@ -375,8 +382,14 @@ class VLMAPIClient:
             pmsg = probe.choices[0].message
             tool_calls = getattr(pmsg, "tool_calls", None)
             if isinstance(tool_calls, (list, tuple)) and tool_calls:
-                messages.append(pmsg.model_dump() if hasattr(pmsg, "model_dump") else {
-                    "role": "assistant", "content": pmsg.content, "tool_calls": tool_calls,
+                messages.append({
+                    "role": "assistant",
+                    "content": pmsg.content,
+                    "tool_calls": [
+                        {"id": tc.id, "type": "function",
+                         "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
+                        for tc in tool_calls
+                    ],
                 })
                 for tc in tool_calls:
                     result = execute_tool_call(tc.function.name, tc.function.arguments)
