@@ -234,7 +234,7 @@ class RagManager:
                 embedding = self.embedding_provider.embed(item.get("content") or "")
                 self._backfill_embedding(item["chunk_id"], embedding)
             score = HashEmbeddingProvider.cosine_similarity(query_vector, embedding)
-            if score > 0:
+            if score >= 0.1:
                 item["score"] = score
                 scored.append(item)
         scored.sort(key=lambda x: x["score"], reverse=True)

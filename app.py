@@ -1113,7 +1113,7 @@ class VLMChatAssistant:
         )
 
     def create_interface(self):
-        with gr.Blocks(title="VLM Chat", fill_height=True, theme=LIGHT_THEME, js=INJECT_CSS_JS) as demo:
+        with gr.Blocks(title="VLM Chat", fill_height=True, theme=LIGHT_THEME) as demo:
             # 每个浏览器独立的会话标识（多用户隔离）
             session_state = gr.State(None)
             with gr.Row(elem_id="app-row", equal_height=True):
@@ -1224,7 +1224,6 @@ class VLMChatAssistant:
                         placeholder="上传图片或输入问题开始对话…",
                         render_markdown=True,
                         sanitize_html=False,
-                        show_copy_button=True,
                         latex_delimiters=[
                             {"left": "$$", "right": "$$", "display": True},
                             {"left": "$", "right": "$", "display": False},
